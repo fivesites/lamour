@@ -53,9 +53,9 @@ export default function ProgressBar() {
       {/* fading background */}
       <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
 
-      <div className="relative px-4 pb-6 pt-8 pointer-events-auto">
+      <div className="relative px-4 pb-6 pt-8 pointer-events-auto overflow-hidden">
         {/* row number labels */}
-        <div className="relative w-full h-4 mb-1">
+        <div className="relative w-full h-4 mb-1 overflow-hidden">
           {markers.map(({ row, pct }) => (
             <button
               key={row}
@@ -73,7 +73,7 @@ export default function ProgressBar() {
         </div>
 
         {/* track */}
-        <div className="relative w-full h-px bg-foreground/15">
+        <div className="relative w-full h-px bg-foreground/15 overflow-visible">
           {/* markers on track */}
           {markers.map(({ row, pct }) => (
             <button
