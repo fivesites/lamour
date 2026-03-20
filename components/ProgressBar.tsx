@@ -53,7 +53,7 @@ export default function ProgressBar() {
       {/* fading background */}
       <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
 
-      <div className="relative px-6 pb-6 pt-8 pointer-events-auto">
+      <div className="relative px-4 pb-6 pt-8 pointer-events-auto">
         {/* row number labels */}
         <div className="relative w-full h-4 mb-1">
           {markers.map(({ row, pct }) => (

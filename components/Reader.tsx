@@ -5,7 +5,6 @@ import { useRef } from "react";
 import { motion } from "framer-motion";
 import Article from "@/components/Article";
 import ProgressBar from "@/components/ProgressBar";
-import RowNumbers from "@/components/RowNumbers";
 import { ScrollContainerContext } from "@/lib/ScrollContainerContext";
 
 export default function Reader({ onClose }: { onClose: () => void }) {
@@ -34,9 +33,7 @@ export default function Reader({ onClose }: { onClose: () => void }) {
         </div>
       </div>
       <ScrollContainerContext.Provider value={scrollRef}>
-        <div className="relative">
-          <Article />
-        </div>
+        <Article />
         <ProgressBar />
       </ScrollContainerContext.Provider>
     </motion.div>

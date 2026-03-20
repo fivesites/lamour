@@ -23,7 +23,7 @@ export default function Article() {
           <h3 className="h3">september, 28, 2025</h3>
         </span>
       </div>
-      <div className=" flex flex-col pt-[100vh] px-6 pb-12   ">
+      <div className=" flex flex-col pt-[100vh] px-4 pb-12   ">
         <MagicText
           indent
           text="Det är söndag och jag mår mycket illa på tåget tillbaka Stockholm men nödgas blogga eftersom min hårde men rättvise redaktör Jonathan har satt krypskyttar väntandes utanför mitt hus, redo att avfyra, om jag inte gör ett sista blogginlägg. Jag lovar att inte nämna Doom så mycket här men ni bör veta att jag lyssnar på Dopesmoker medan jag skriver dessa ord"
