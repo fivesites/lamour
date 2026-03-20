@@ -13,7 +13,7 @@ export default function Reader({ onClose }: { onClose: () => void }) {
   return (
     <motion.div
       ref={scrollRef}
-      className="fixed inset-0 z-50 bg-background overflow-y-auto"
+      className="fixed inset-0 z-50 bg-background overflow-y-auto w-full"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

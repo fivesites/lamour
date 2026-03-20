@@ -21,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${baskerville.variable} antialiased overflow-x-hidden`}>{children}</body>
+      <body className={`${baskerville.variable} antialiased`}>{children}</body>
     </html>
   );
 }
