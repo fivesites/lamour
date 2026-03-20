@@ -12,7 +12,7 @@ export default function ArticleCard() {
   return (
     <>
       <div
-        className="relative flex flex-col items-start justify-between p-12 h-[80vh] cursor-pointer overflow-hidden"
+        className="relative flex flex-col items-start justify-between px-6 pt-8 pb-12 h-[80vh] cursor-pointer overflow-hidden"
         onClick={() => setOpen(true)}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -20,7 +20,7 @@ export default function ArticleCard() {
         <AnimatePresence>
           {hovered && (
             <motion.div
-              className="absolute inset-0 z-0"
+              className="absolute inset-4 z-0"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1, filter: "blur(24px)" }}
               exit={{ opacity: 0 }}

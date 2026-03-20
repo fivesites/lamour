@@ -35,7 +35,6 @@ export default function Reader({ onClose }: { onClose: () => void }) {
       </div>
       <ScrollContainerContext.Provider value={scrollRef}>
         <div className="relative">
-          <RowNumbers containerRef={scrollRef} />
           <Article />
         </div>
         <ProgressBar />

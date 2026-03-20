@@ -11,8 +11,8 @@ export default function Home() {
       <LogoNav />
       <section className="flex flex-col mt-[100vh]">
         <HeroArticlePage />
-        <hr className="border-t border-foreground mx-8" />
-        <div className="flex flex-col p-8">
+        <hr className="border-t border-foreground mx-4" />
+        <div className="flex flex-col p-4">
           <ArticleCard />
         </div>
       </section>

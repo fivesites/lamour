@@ -6,9 +6,9 @@ import { MagicText } from "./MagicText";
 
 export default function Article() {
   return (
-    <div className="min h-screen mt-12">
+    <div className="min h-screen w-full ">
       {/* HERO */}
-      <div className="absolute top-0 left-0 z-20 bg-background flex flex-col items-start justify-start px-12 py-6 gap-6 h-screen  ">
+      <div className="absolute top-0 left-0 z-20 bg-background flex flex-col items-start justify-center px-12 py-6 gap-6 h-screen  ">
         <h1 className="h1">Bokmässan del IV: Litteraturen är forever</h1>
         <div className="relative w-1/2 h-64">
           <Image
@@ -23,7 +23,7 @@ export default function Article() {
           <h3 className="h3">september, 28, 2025</h3>
         </span>
       </div>
-      <div className=" flex flex-col pt-[100vh] px-6 pb-12  border-foreground ">
+      <div className=" flex flex-col pt-[100vh] px-6 pb-12   ">
         <MagicText
           indent
           text="Det är söndag och jag mår mycket illa på tåget tillbaka Stockholm men nödgas blogga eftersom min hårde men rättvise redaktör Jonathan har satt krypskyttar väntandes utanför mitt hus, redo att avfyra, om jag inte gör ett sista blogginlägg. Jag lovar att inte nämna Doom så mycket här men ni bör veta att jag lyssnar på Dopesmoker medan jag skriver dessa ord"

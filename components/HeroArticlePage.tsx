@@ -1,6 +1,6 @@
 export default function HeroArticlePage() {
   return (
-    <div className="flex flex-col items-start justify-between p-8 h-screen ">
+    <div className="flex flex-col items-start justify-between p-4 h-screen ">
       <h1 className="h1">Liveblog från bokmässan 2025</h1>
       <p className="p indent-8">
         Löpande liverapportering från mörkrets hjärta. Vår utsände Charlie
