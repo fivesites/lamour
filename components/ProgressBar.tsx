@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useScrollContainer } from "@/lib/ScrollContainerContext";
+import Stretch from "./Stretch";
 
 const ROW_HEIGHT = 28; // matches line-height in MagicText / .p
 const ROW_INTERVAL = 24;
@@ -49,25 +50,25 @@ export default function ProgressBar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 w-full z-50 pointer-events-none">
+    <div className="fixed bottom-0 left-0 w-full z-50 pointer-events-none bg-background">
       {/* fading background */}
-      <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
+      {/* <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" /> */}
 
-      <div className="relative px-4 pb-6 pt-8 pointer-events-auto overflow-hidden">
+      <div className="relative px-4 pb-4 pt-1.5 pointer-events-auto overflow-hidden">
         {/* row number labels */}
-        <div className="relative w-full h-4 mb-1 overflow-hidden">
+        <div className="relative w-full h-4 mb-2 overflow-hidden">
           {markers.map(({ row, pct }) => (
             <button
               key={row}
               onClick={() => jumpTo(pct)}
-              className="absolute font-baskerville -translate-x-1/2 text-foreground/40 hover:text-foreground transition-colors cursor-pointer"
+              className="absolute font-baskerVilleOld text-xs -translate-x-1/2 text-foreground/40 hover:text-foreground transition-colors cursor-pointer mb-4"
               style={{
                 left: `${pct * 100}%`,
-                fontSize: "8px",
+
                 lineHeight: "1",
               }}
             >
-              {row}
+              <Stretch text={row.toString()} size="text-xs" />
             </button>
           ))}
         </div>
@@ -90,7 +91,7 @@ export default function ProgressBar() {
           />
           {/* playhead */}
           <div
-            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-foreground"
+            className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4  bg-foreground"
             style={{ left: `${progress * 100}%` }}
           />
         </div>

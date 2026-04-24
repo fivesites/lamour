@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Stretch from "./Stretch";
 
 interface ImageBoxProps {
   src: string;
@@ -17,7 +18,7 @@ export default function ImageBox({ src, alt = "", caption }: ImageBoxProps) {
         sizes="100vw"
         className="w-full h-auto"
       />
-      {caption && <p className="h4">{caption}</p>}
+      {caption && <Stretch text={caption} size="text-base" />}
     </div>
   );
 }

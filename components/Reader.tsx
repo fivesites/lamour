@@ -13,7 +13,7 @@ export default function Reader({ onClose }: { onClose: () => void }) {
   return (
     <motion.div
       ref={scrollRef}
-      className="fixed inset-0 z-50 bg-background overflow-y-auto w-full"
+      className="fixed inset-0 z-90 bg-background overflow-y-auto w-full"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -25,16 +25,16 @@ export default function Reader({ onClose }: { onClose: () => void }) {
         <div className="relative flex items-center justify-center px-4 pt-4 pb-8 pointer-events-auto gap-16 w-full">
           <button
             onClick={onClose}
-            className="absolute left-1/2 top-4 right-0 -translate-x-1/2 z-50 w-10 h-10 flex items-center justify-center"
+            className="absolute left-1/2 top-4 right-0 -translate-x-1/2 z-50 w-10 h-10 flex items-center justify-center leading-0 font-baskerVilleOld text-4xl text-foreground hover:text-foreground/40"
             aria-label="Close"
           >
-            <Image src="/X_Icon.svg" alt="Close" width={16} height={16} />
+            X
           </button>
         </div>
       </div>
       <ScrollContainerContext.Provider value={scrollRef}>
         <Article />
-        <ProgressBar />
+        {/* <ProgressBar /> */}
       </ScrollContainerContext.Provider>
     </motion.div>
   );

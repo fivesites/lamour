@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Baskervville } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 const baskerville = Baskervville({
@@ -7,6 +8,18 @@ const baskerville = Baskervville({
   display: "swap",
   weight: "400",
   subsets: ["latin"],
+});
+
+const baskervilleOldFace = localFont({
+  src: "./BASKVILL.ttf",
+  variable: "--font-baskerville-old-face",
+  display: "swap",
+});
+
+const baskervilleClassic = localFont({
+  src: "./Baskerville-01.ttf",
+  variable: "--font-baskervilleClassic",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,7 +34,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${baskerville.variable} antialiased`}>{children}</body>
+      <body
+        className={`${baskerville.variable} ${baskervilleOldFace.variable} ${baskervilleClassic.variable} antialiased`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

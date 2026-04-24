@@ -8,8 +8,10 @@ export default function Article() {
   return (
     <div className="min h-screen w-full ">
       {/* HERO */}
-      <div className="absolute top-0 left-0 z-20 bg-background flex flex-col items-start justify-center px-12 py-6 gap-6 h-screen  ">
-        <h1 className="h1">Bokmässan del IV: Litteraturen är forever</h1>
+      <div className="absolute top-0 left-0 z-20 bg-background flex flex-col items-start justify-center px-12 pt-12 pb-6 gap-6 h-screen w-full  ">
+        <h1 className="text-4xl font-baskerVilleOld uppercase tracking-[.25em] leading-relaxed">
+          Bokmässan del IV: Litteraturen är forever
+        </h1>
         <div className="relative w-1/2 h-64">
           <Image
             src="/552480399_1135570284737492_1550349593426496482_n-1-451x600.jpg.webp"
@@ -19,11 +21,15 @@ export default function Article() {
           />
         </div>
         <span>
-          <h2 className="h2">Charlie Brandin Avehall</h2>
-          <h3 className="h3">september, 28, 2025</h3>
+          <h2 className="text-2xl font-baskerVilleOld  tracking-widest leading-relaxed">
+            Charlie Brandin Avehall
+          </h2>
+          <h3 className="text-xl font-baskervilleClassic italic  tracking-wider leading-relaxed">
+            september, 28, 2025
+          </h3>
         </span>
       </div>
-      <div className=" flex flex-col pt-[100vh] px-4 pb-12   ">
+      <div className=" flex flex-col pt-[100vh] px-4 pb-12 p  ">
         <MagicText
           indent
           text="Det är söndag och jag mår mycket illa på tåget tillbaka Stockholm men nödgas blogga eftersom min hårde men rättvise redaktör Jonathan har satt krypskyttar väntandes utanför mitt hus, redo att avfyra, om jag inte gör ett sista blogginlägg. Jag lovar att inte nämna Doom så mycket här men ni bör veta att jag lyssnar på Dopesmoker medan jag skriver dessa ord"
