@@ -1,7 +1,14 @@
 "use client";
 
-import { CSSProperties, useMemo } from "react";
-import { motion } from "motion/react";
+import { CSSProperties, useEffect, useMemo, useRef } from "react";
+import {
+  motion,
+  useMotionValue,
+  useTransform,
+  type MotionValue,
+} from "motion/react";
+
+/* -------- CHARACTER SUBSTITUTIONS (rotate effect) -------- */
 
 type Substitution = {
   char: string;
@@ -23,23 +30,16 @@ function buildTransform(sub: Substitution): CSSProperties {
   if (sub.rotateZ !== undefined) parts.push(`rotateZ(${sub.rotateZ}deg)`);
   if (sub.flipX) parts.push("scaleX(-1)");
   if (sub.flipY) parts.push("scaleY(-1)");
-  return parts.length ? { transform: parts.join(" "), display: "inline-block" } : {};
+  return parts.length
+    ? { transform: parts.join(" "), display: "inline-block" }
+    : {};
 }
 
-function mxFromStretch(stretch?: string): string | undefined {
-  if (!stretch) return undefined;
-  const match = stretch.match(/scale-x-(\d+)/);
-  if (!match) return undefined;
-  const scale = parseInt(match[1], 10);
-  const mx = ((scale - 100) / 100) * 0.2;
-  return mx > 0 ? `${mx.toFixed(3)}em` : undefined;
-}
+/* -------- MONO MEASUREMENT (canvas) -------- */
 
-// Measure each character's natural width at a fixed size to derive scaleX
-// so it fills a 1:1 square (cell size = font-size = height of em square).
 function measureMonoScales(
   chars: string[],
-  fontStyle: string
+  fontStyle: string,
 ): Record<string, number> {
   if (typeof window === "undefined") return {};
   const REF_PX = 100;
@@ -50,23 +50,75 @@ function measureMonoScales(
   for (const char of chars) {
     if (char === " ") continue;
     const w = ctx.measureText(char).width;
-    // scaleX to make char fill REF_PX wide square; clamp so we don't over-squish
     result[char] = w > 0 ? Math.min(REF_PX / w, 4) : 1;
   }
   return result;
 }
 
+/* -------- TEXT PARSER -------- */
+
+function parseChars(text: string) {
+  return text.split("").map((char) => ({ char, isSpace: char === " " }));
+}
+
+/* -------- ANIMATED CHAR (keeps hooks-in-loops legal) -------- */
+
+function AnimChar({
+  char,
+  progress,
+  targetScaleX,
+  targetScaleY,
+  rotateCls,
+  subStyle,
+}: {
+  char: string;
+  progress: MotionValue<number>;
+  targetScaleX: number;
+  targetScaleY: number;
+  rotateCls: string;
+  subStyle: CSSProperties;
+}) {
+  const scaleX = useTransform(
+    progress,
+    (p) => 1 + (targetScaleX - 1) * p,
+  );
+  const scaleY = useTransform(
+    progress,
+    (p) => 1 + (targetScaleY - 1) * p,
+  );
+  return (
+    <motion.span
+      className={`inline-block origin-center ${rotateCls}`}
+      style={{ ...subStyle, scaleX, scaleY }}
+    >
+      {char}
+    </motion.span>
+  );
+}
+
+/* -------- TYPES -------- */
+
 export type LLTextProps = {
   text: string;
-  stretch?: string;
-  stretchY?: string;
+  /** scaleX target (e.g. 2 = 200%). Animated via progress. */
+  stretch?: number;
+  /** scaleY target. Animated via progress. */
+  stretchY?: number;
+  /** Animate letter-spacing from center-clustered to fully justified. */
   justify?: boolean;
+  /** Apply character substitutions (S→rotated S, etc.) */
   rotate?: boolean;
+  /** Make all characters equal width using canvas measurement. */
   mono?: boolean;
-  monoFont?: string; // font-family string for canvas measurement
+  monoFont?: string;
+  /** Width of a space character (not animated). */
   gap?: string;
   className?: string;
+  /** External 0-1 motion value that drives all animation. */
+  animProgress?: MotionValue<number>;
 };
+
+/* -------- COMPONENT -------- */
 
 export default function LLText({
   text,
@@ -78,69 +130,121 @@ export default function LLText({
   monoFont = "Baskerville, 'Baskerville Old Face', serif",
   gap = "0.35em",
   className = "",
+  animProgress,
 }: LLTextProps) {
-  const mx = mxFromStretch(stretch);
+  // Fallback: static progress at 1 (effect fully applied when no animation)
+  const staticProgress = useMotionValue(1);
+  const progress = animProgress ?? staticProgress;
+
+  // Step 1: pretext ref for measuring natural text width
+  const pretextRef = useRef<HTMLSpanElement>(null);
+  // Container ref for available width
+  const containerRef = useRef<HTMLSpanElement>(null);
+  // MotionValue for max gap — updating it triggers columnGap recompute
+  const maxGapMV = useMotionValue(0);
+
+  const parsed = useMemo(() => parseChars(text), [text]);
 
   const monoScales = useMemo(() => {
-    if (!mono) return {};
-    const chars = [...new Set(text.split(""))];
-    return measureMonoScales(chars, monoFont);
-  }, [mono, text, monoFont]);
+    if (!mono) return {} as Record<string, number>;
+    const uniqueChars = [...new Set(parsed.map((c) => c.char))];
+    return measureMonoScales(uniqueChars, monoFont);
+  }, [mono, parsed, monoFont]);
+
+  // Step 1: measure pretext vs container to compute max justify gap
+  useEffect(() => {
+    if (!justify) return;
+
+    const measure = () => {
+      const pretext = pretextRef.current;
+      const container = containerRef.current;
+      if (!pretext || !container) return;
+
+      const textW = pretext.offsetWidth;
+      const containerW = container.offsetWidth;
+      const totalItems = parsed.length; // chars + spaces as separate flex items
+      if (totalItems > 1) {
+        maxGapMV.set(Math.max(0, (containerW - textW) / (totalItems - 1)));
+      }
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (containerRef.current) ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, [justify, parsed, maxGapMV]);
+
+  // Step 3: animate columnGap from 0 → maxGap via progress
+  const columnGap = useTransform(
+    [progress, maxGapMV] as MotionValue[],
+    ([p, maxG]: number[]) => (justify ? p * maxG : 0),
+  );
+
+  const hasCharAnimation =
+    mono || (stretch !== undefined && stretch !== 1) || (stretchY !== undefined && stretchY !== 1);
 
   return (
+    // Step 2: container always at justify-center as the base
     <span
-      className={`flex items-center w-full ${justify ? "justify-between" : mono ? "justify-center" : ""} ${className}`}
-      style={mono ? { gap: "0.3em", flexWrap: "wrap" } : undefined}
+      ref={containerRef}
+      className={`relative flex items-center w-full justify-center ${className}`}
     >
-      {(() => {
-        let charIdx = 0;
-        return text.split("").map((char, i) => {
-          if (char === " ") {
-            return (
-              <span key={i} style={{ width: mono ? "1.2em" : gap }} aria-hidden />
-            );
+      {/* Step 1: hidden pretext for dimension measurement */}
+      {justify && (
+        <span
+          ref={pretextRef}
+          className="absolute opacity-0 pointer-events-none whitespace-nowrap"
+          aria-hidden
+        >
+          {text}
+        </span>
+      )}
+
+      {/* Step 2+3: actual text with motion-driven gap */}
+      <motion.span
+        className="flex items-center justify-center"
+        style={{ columnGap }}
+      >
+        {parsed.map((item, i) => {
+          if (item.isSpace) {
+            return <span key={i} style={{ width: gap }} aria-hidden />;
           }
 
-          const sub = rotate ? SUBSTITUTIONS[char] : undefined;
-          const displayChar = sub?.char ?? char;
+          const sub = rotate ? SUBSTITUTIONS[item.char] : undefined;
+          const displayChar = sub?.char ?? item.char;
           const rotateCls = sub?.rotate ?? "";
-          const stretchCls = [stretch, stretchY].filter(Boolean).join(" ");
-          const subTransform = sub ? buildTransform(sub) : {};
+          const subStyle = sub ? buildTransform(sub) : {};
 
-          if (mono) {
-            const scaleX = monoScales[char] ?? 1;
-            const delay = charIdx * 0.04;
-            charIdx++;
+          const targetScaleX = mono
+            ? (monoScales[item.char] ?? 1)
+            : (stretch ?? 1);
+          const targetScaleY = stretchY ?? 1;
+
+          if (hasCharAnimation) {
             return (
-              <span
+              <AnimChar
                 key={i}
-                className={`inline-flex items-center justify-center ${rotateCls}`}
-                style={{ width: "1.2em", height: "1.2em", flexShrink: 0 }}
-              >
-                <motion.span
-                  className={`inline-block ${stretchCls}`}
-                  style={{ ...subTransform, originX: 0.5, originY: 0.5 }}
-                  initial={{ scaleX: 1 }}
-                  animate={{ scaleX }}
-                  transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-                >
-                  {displayChar}
-                </motion.span>
-              </span>
+                char={displayChar}
+                progress={progress}
+                targetScaleX={targetScaleX}
+                targetScaleY={targetScaleY}
+                rotateCls={rotateCls}
+                subStyle={subStyle}
+              />
             );
           }
 
           return (
             <span
               key={i}
-              className={`inline-block origin-center ${rotateCls} ${stretchCls}`}
-              style={mx ? { ...subTransform, marginInline: mx } : subTransform}
+              className={`inline-block origin-center ${rotateCls}`}
+              style={subStyle}
             >
               {displayChar}
             </span>
           );
-        });
-      })()}
+        })}
+      </motion.span>
     </span>
   );
 }

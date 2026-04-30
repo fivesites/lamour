@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
+import { useRef, useMemo } from "react";
 import { useScrollContainer } from "@/lib/ScrollContainerContext";
 
 export interface MagicTextProps {
@@ -27,6 +27,38 @@ const Word: React.FC<WordProps> = ({ children, progress, range }) => {
   );
 };
 
+/* ---------------- PRETEXT HOOK ---------------- */
+
+function usePretextWords(text: string, indent?: boolean) {
+  return useMemo(() => {
+    if (!text) return [];
+
+    const paragraphs = text.split("\n");
+
+    return paragraphs.flatMap((p, pi) => {
+      // Split paragraph into words manually to avoid missing 'pretext' module
+      const words = p
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((w) => ({
+          word: w,
+          break: false,
+          spacer: false,
+        }));
+
+      return [
+        ...(indent ? [{ word: "", break: false, spacer: true }] : []),
+        ...words,
+        ...(pi < paragraphs.length - 1
+          ? [{ word: "", break: true, spacer: false }]
+          : []),
+      ];
+    });
+  }, [text, indent]);
+}
+
+/* ---------------- MAIN COMPONENT ---------------- */
+
 export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
   const container = useRef(null);
   const scrollContainer = useScrollContainer();
@@ -37,14 +69,7 @@ export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
     offset: ["start 0.9", "start 0.1"],
   });
 
-  const paragraphs = text.split("\n");
-  const allWords = paragraphs.flatMap((p, pi) => [
-    ...(indent ? [{ word: "", break: false, spacer: true }] : []),
-    ...p.split(" ").map((w) => ({ word: w, break: false, spacer: false })),
-    ...(pi < paragraphs.length - 1
-      ? [{ word: "", break: true, spacer: false }]
-      : []),
-  ]);
+  const allWords = usePretextWords(text, indent);
 
   return (
     <p
@@ -53,10 +78,15 @@ export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
     >
       {allWords.map((item, i) => {
         if (item.break) return <br key={`br-${i}`} />;
-        if (item.spacer)
+
+        if (item.spacer) {
           return <span key={`indent-${i}`} className="inline-block w-16" />;
+        }
+
+        const spread = 0.15; // controls overlap
         const start = i / allWords.length;
-        const end = start + 1 / allWords.length;
+        const end = start + spread;
+
         return (
           <Word key={i} progress={scrollYProgress} range={[start, end]}>
             {item.word}

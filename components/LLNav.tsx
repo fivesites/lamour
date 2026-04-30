@@ -6,80 +6,52 @@ import { useState } from "react";
 import ProductCard from "./ProductCard";
 import { motion, AnimatePresence } from "motion/react";
 import LLButton from "./LLButton";
+import { useIssues } from "@/lib/contexts/IssuesContext";
+import { useArticles } from "@/lib/contexts/ArticlesContext";
 
-function ArticleSubMenu({ setNavOpen }: { setNavOpen: (open: boolean) => void }) {
+function ArticleSubMenu({
+  setNavOpen,
+}: {
+  setNavOpen: (open: boolean) => void;
+}) {
+  const { articles } = useArticles();
+
   return (
     <div className="flex flex-col items-center justify-center whitespace-normal list-none px-4 gap-4 w-full max-h-[60vh] overflow-y-auto">
-      <li className="w-full">
-        <Button
-          variant="link"
-          size="linkSize"
-          className="font-baskerVilleOld text-4xl text-center justify-center "
-          onClick={() => setNavOpen(false)}
-          asChild
-        >
-          <Link href="/articles">Liveblog från bokmässan 2025</Link>
-        </Button>
-      </li>
-      <li className="w-full">
-        <Button
-          variant="link"
-          size="linkSize"
-          className="font-baskerVilleOld text-center justify-center text-4xl"
-          asChild
-        >
-          <Link href="/">Intervju Stig Larsson</Link>
-        </Button>
-      </li>
-      <li className="w-full">
-        <Button
-          variant="link"
-          size="linkSize"
-          className="font-baskerVilleOld text-center justify-center text-4xl"
-          asChild
-        >
-          <Link href="/articles ">Liveblog från bokmässan 2023</Link>
-        </Button>
-      </li>
-      <li className="w-full">
-        <Button
-          variant="link"
-          size="linkSize"
-          className="font-baskerVilleOld text-center justify-center text-4xl"
-          asChild
-        >
-          <Link href="/">
-            Intervju: HUR SMAKAR HEMLÄNGTAN (Teodor Kallifatides & Olena
-            Rogozina)
-          </Link>
-        </Button>
-      </li>
+      {articles.map((article) => (
+        <li key={article._id} className="w-full">
+          <Button
+            variant="link"
+            size="linkSize"
+            className="font-baskerVilleOld text-4xl text-center justify-center"
+            onClick={() => setNavOpen(false)}
+            asChild
+          >
+            <Link href={`/articles/${article.slug.current}`}>
+              {article.title}
+            </Link>
+          </Button>
+        </li>
+      ))}
     </div>
   );
 }
 
 function ShopSubMenu() {
+  const issues = useIssues();
+
   return (
-    <div className="flex flex-col items-start justify-start whitespace-normal p-0 gap-4 w-full max-h-[60vh] overflow-y-auto lg:flex-row lg:flex-wrap">
-      <div className="w-full lg:w-1/3">
+    <div className="flex flex-col items-start justify-start whitespace-normal p-0 w-full max-h-[60vh] overflow-y-auto">
+      {issues.map((issue) => (
         <ProductCard
-          articleID="20"
-          title="Resenärer"
-          price="220"
-          image="LL-20-Cover-foto-scaled.jpg"
+          key={issue._id}
+          variant="noIMG"
+          articleID={String(issue.issueNumber)}
+          title={issue.title}
+          href={`/shop/${issue.slug.current}`}
+          price={issue.price ? String(Math.round(issue.price / 100)) : "—"}
         />
-      </div>
-      <div className="w-full lg:w-1/3">
-        <ProductCard
-          articleID="11"
-          title="BABO"
-          price="150"
-          image="LL11-Cover.jpg"
-        />
-      </div>
-      <div className="w-full lg:w-1/3">
-        <ProductCard variant="noIMG" title="Presentkort" price="250" />
-      </div>
+      ))}
     </div>
   );
 }
@@ -96,7 +68,7 @@ export default function LLNav() {
       >
         {/* LAMOUR LA MORT ROW */}
         <motion.div
-          className="flex items-center justify-between font-baskerville pt-4 px-4 whitespace-nowrap"
+          className="flex items-center justify-between w-full font-baskerville pt-4 px-4 whitespace-nowrap"
           initial={{ width: "min-content" }}
           animate={{ width: navOpen ? "100%" : "min-content" }}
           transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -105,8 +77,9 @@ export default function LLNav() {
             variant="link"
             size="linkSize"
             className="font-baskerVilleOld text-4xl w-auto pr-2"
+            asChild
           >
-            L'Amour
+            <Link href="/"> L'Amour</Link>
           </Button>
 
           <motion.span
@@ -119,8 +92,9 @@ export default function LLNav() {
             className="flex gap-4 font-baskerVilleOld text-4xl w-auto pl-2"
             variant="link"
             size="linkSize"
+            asChild
           >
-            La Mort
+            <Link href="/"> La Mort</Link>
           </Button>
         </motion.div>
 
@@ -128,7 +102,7 @@ export default function LLNav() {
         <AnimatePresence>
           {navOpen && (
             <motion.div
-              className="flex flex-wrap gap-x-4 justify-center w-full font-baskerville py-4 px-4"
+              className="flex flex-col gap-x-4 justify-center w-full font-baskerville py-4 px-4"
               initial="hidden"
               animate="visible"
               exit="hidden"
@@ -138,7 +112,7 @@ export default function LLNav() {
               }}
             >
               <motion.div
-                className="flex justify-between w-full"
+                className="flex flex-col justify-center w-full"
                 variants={{
                   hidden: { opacity: 0, y: -6 },
                   visible: {
@@ -148,36 +122,42 @@ export default function LLNav() {
                   },
                 }}
               >
-                {[
-                  {
-                    label: "Affären",
-                    count: "(24)",
-                    toggle: () => {
-                      setOpenShopSubMenu(!openShopSubMenu);
-                      setOpenArticleSubMenu(false);
-                    },
-                    open: openShopSubMenu,
-                  },
-                  {
-                    label: "Artiklar",
-                    count: "(44)",
-                    toggle: () => {
-                      setOpenArticleSubMenu(!openArticleSubMenu);
-                      setOpenShopSubMenu(false);
-                    },
-                    open: openArticleSubMenu,
-                  },
-                ].map(({ label, count, toggle, open }) => (
+                {/* Affären */}
+                <Button
+                  variant="link"
+                  size="linkSize"
+                  className="font-baskerVilleOld text-4xl w-full"
+                  onClick={() => {
+                    setOpenShopSubMenu(!openShopSubMenu);
+                    setOpenArticleSubMenu(false);
+                  }}
+                >
+                  Affären {openShopSubMenu ? "(X)" : "(24)"}
+                </Button>
+
+                {/* Artiklar — label links to /articles, count toggles submenu */}
+                <div className="flex items-center w-full">
                   <Button
-                    key={label}
                     variant="link"
                     size="linkSize"
-                    className="font-baskerVilleOld text-4xl w-auto"
-                    onClick={toggle}
+                    className="font-baskerVilleOld text-4xl flex-1 justify-start"
+                    onClick={() => setNavOpen(false)}
+                    asChild
                   >
-                    {label} {open ? "(X)" : count}
+                    <Link href="/articles">Artiklar</Link>
                   </Button>
-                ))}
+                  <Button
+                    variant="link"
+                    size="linkSize"
+                    className="font-baskerVilleOld text-4xl"
+                    onClick={() => {
+                      setOpenArticleSubMenu(!openArticleSubMenu);
+                      setOpenShopSubMenu(false);
+                    }}
+                  >
+                    {openArticleSubMenu ? "(X)" : "(44)"}
+                  </Button>
+                </div>
               </motion.div>
               {openArticleSubMenu ? (
                 <ArticleSubMenu setNavOpen={setNavOpen} />
@@ -198,7 +178,7 @@ export default function LLNav() {
                   rotate
                   justify
                   hover
-                  className="text-4xl tracking-widest font-baskervilleClassic"
+                  className=" w-full text-4xl tracking-widest font-baskervilleClassic"
                 />
               </motion.div>
               <motion.div
@@ -213,7 +193,7 @@ export default function LLNav() {
               >
                 <LLButton
                   text="(Prenumerera)"
-                  stretch="scale-x-200"
+                  stretch={2}
                   justify
                   hover
                   variant="link"
