@@ -8,12 +8,12 @@ const components: PortableTextComponents = {
       </p>
     ),
     h2: ({ children }) => (
-      <h2 className="font-baskerVilleOld text-2xl tracking-widest uppercase mb-3 mt-6">
+      <h2 className="font-baskerVilleOld text-2xl tracking-widest uppercase  mb-3 mt-6">
         {children}
       </h2>
     ),
     h3: ({ children }) => (
-      <h3 className="font-baskerVilleOld text-xl italic tracking-wide mb-3 mt-4">
+      <h3 className="font-baskerVilleOld text-xl italic tracking-wide mb-3  mt-4">
         {children}
       </h3>
     ),

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import Stretch from "./Stretch";
+import LLButton from "./LLButton";
 
 function PriceButton({ price }: { price: string }) {
   return (
@@ -12,9 +13,7 @@ function PriceButton({ price }: { price: string }) {
       className="font-baskerVilleOld text-4xl w-auto gap-0"
     >
       <Stretch size="text-4xl" text={price} />
-      <span className="text-4xl font-normal tracking-wide font-baskerVilleOld ml-2">
-        KR
-      </span>
+      <span className="text-4xl font-normal tracking-wide font-baskerVilleOld ml-2"></span>
     </Button>
   );
 }
@@ -27,6 +26,8 @@ type ProductCardProps = {
   image?: string;
   imageSize?: string;
   variant?: "default" | "noIMG";
+  description?: string;
+  truncate?: boolean;
 };
 
 export default function ProductCard({
@@ -37,15 +38,17 @@ export default function ProductCard({
   image,
   imageSize = "h-64",
   variant = "default",
+  description,
+  truncate = false,
 }: ProductCardProps) {
   const header = (
-    <div className="flex flex-wrap gap-x-2 items-start">
+    <div className="">
       {articleID && (
-        <span className="flex items-center font-mono text-foreground/40 tracking-widest whitespace-nowrap text-4xl">
+        <span className="flex items-center font-mono text-foreground/40 tracking-widest whitespace-nowrap text-lg gap-x-0">
           LL#{articleID}
         </span>
       )}
-      <span className="flex-1 self-center block h-px bg-black min-w-8" />
+      {/* <span className="flex-1 self-center block h-px bg-black min-w-8" /> */}
       <CardTitle className="text-4xl font-baskerVilleOld font-normal">
         {title}
       </CardTitle>
@@ -53,8 +56,8 @@ export default function ProductCard({
   );
 
   return (
-    <Card className="uppercase w-full gap-0 px-0 pt-2 rounded-none border-b border-b-foreground bg-transparent font-baskerVilleOld flex flex-col items-start justify-start">
-      <CardContent className="flex flex-wrap w-full justify-between items-center p-0">
+    <Card className="uppercase w-full gap-0 p-2 rounded-none  font-baskerVilleOld bg-transparent flex flex-col ">
+      <CardContent className="flex flex-col w-full justify-start items-start p-0">
         {href ? (
           <Link href={href} className="hover:opacity-60 transition-opacity">
             {header}
@@ -74,14 +77,29 @@ export default function ProductCard({
           />
         </div>
       )}
-      <CardFooter className="px-0 pb-0 flex items-start justify-start">
-        <Button
-          variant="link"
-          size="linkSize"
-          className="font-baskerVilleClassic uppercase text-xl justify-start w-full whitespace-normal text-left tracking-widest"
-        >
-          (Lägg i korg)
-        </Button>
+      {description && (
+        <div className="w-full pt-2">
+          <p
+            className={`font-baskerVilleClassic text-xl tracking-wide normal-case${truncate ? " line-clamp-2" : ""}`}
+          >
+            {description}
+          </p>
+          {truncate && (
+            <Button
+              variant="link"
+              size="linkSize"
+              className="font-baskerVilleClassic text-xl normal-case tracking-widest px-0"
+            >
+              (Read more)
+            </Button>
+          )}
+        </div>
+      )}
+      <CardFooter className="py-2 px-0 flex items-center justify-end lg:justify-start">
+        <LLButton
+          text="(Lägg i korg)"
+          className="font-baskerVilleClassic uppercase text-xl justify-end w-min whitespace-normal  tracking-widest lg:justify-start  p-0"
+        />
       </CardFooter>
     </Card>
   );

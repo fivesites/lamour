@@ -7,6 +7,7 @@ import SanityPortableText from "@/components/SanityPortableText";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LLButton from "@/components/LLButton";
 
 export const revalidate = 3600;
 
@@ -55,14 +56,13 @@ export default async function IssuePage({
 
   return (
     <>
-      <section className="flex flex-col mt-[25vh] w-full min-h-screen px-4 pt-8 pb-32">
+      <section className="flex flex-col mt-24 w-full min-h-screen px-4  pb-32">
         {/* back */}
-        <Link
+        {/* <LLButton
           href="/shop"
-          className="font-baskerVilleOld text-xl tracking-widest text-foreground/40 hover:text-foreground transition-colors mb-8 inline-block"
-        >
-          ← Affären
-        </Link>
+          text="Tillbaka till Affären"
+          className="font-baskerVilleOld text-xl tracking-widest text-foreground/40 hover:text-foreground transition-colors w-min inline-block"
+        /> */}
 
         <div className="flex flex-col lg:flex-row gap-12 w-full">
           {/* Cover */}
@@ -122,7 +122,6 @@ export default async function IssuePage({
             </div>
           </div>
         </div>
-
         {/* Preview gallery */}
         {issue.previewImages && issue.previewImages.length > 0 && (
           <div className="mt-16">
@@ -130,16 +129,18 @@ export default async function IssuePage({
               Inblick
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {issue.previewImages.filter((img) => img.asset?._ref).map((img) => (
-                <div key={img._key} className="relative aspect-[3/4]">
-                  <Image
-                    src={urlFor(img).width(600).url()}
-                    alt={img.alt ?? ""}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-              ))}
+              {issue.previewImages
+                .filter((img) => img.asset?._ref)
+                .map((img) => (
+                  <div key={img._key} className="relative aspect-[3/4]">
+                    <Image
+                      src={urlFor(img).width(600).url()}
+                      alt={img.alt ?? ""}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                ))}
             </div>
           </div>
         )}
