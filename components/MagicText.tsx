@@ -74,7 +74,7 @@ export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
   return (
     <p
       ref={container}
-      className="font-baskerville text-[19.3px] leading-7 tracking-[0.04em] p-0"
+      className="font-baskerVV font-baskerVV fo text-[19.3px] leading-7 tracking-[0.04em] p-0"
     >
       {allWords.map((item, i) => {
         if (item.break) return <br key={`br-${i}`} />;

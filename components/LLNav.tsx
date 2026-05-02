@@ -38,7 +38,7 @@ function ArticleSubMenu({
           />
         </span>
         {openSeries && (
-          <>
+          <div className="pl-4">
             {articles.map((article) => (
               <div
                 key={article._id}
@@ -52,7 +52,7 @@ function ArticleSubMenu({
                 />
               </div>
             ))}
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -138,7 +138,7 @@ export default function LLNav() {
         <AnimatePresence>
           {navOpen && (
             <motion.ul
-              className="flex flex-col gap-y-2 w-full justify-start items-start font-baskerville py-4 pl-4 pr-4 list-none"
+              className="mt-16 flex flex-col gap-y-2 w-full justify-start items-start font-baskerville py-4 pl-4 pr-4 list-none"
               initial="hidden"
               animate="visible"
               exit="hidden"
