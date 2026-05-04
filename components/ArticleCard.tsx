@@ -1,80 +1,56 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { urlFor } from "@/lib/sanity/image";
 import type { Article } from "@/lib/contexts/ArticlesContext";
 
-function formatDate(dateStr?: string) {
-  if (!dateStr) return null;
-  return new Date(dateStr).toLocaleDateString("sv-SE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
+const SPINE_HEIGHTS = [
+  "h-12 lg:h-[65vh]",
+  "h-12 lg:h-[80vh]",
+  "h-12 lg:h-[55vh]",
+  "h-12 lg:h-[70vh]",
+  "h-12 lg:h-[75vh]",
+  "h-12 lg:h-[60vh]",
+];
 
-export default function ArticleCard({ article }: { article: Article }) {
-  const [hovered, setHovered] = useState(false);
+const SPINE_COLORS = [
+  "#1A4A4A",
+  "#5C3A1A",
+  "#3D2B5E",
+  "#1A4A2E",
+  "#8B1A1A",
+  "#2A3D5C",
+  "#4A1A2E",
+  "#2D4A3E",
+  "#4A3728",
+  "#1A3A5C",
+];
 
-  const bgSrc = article.coverImage?.asset
-    ? urlFor(article.coverImage).width(800).url()
-    : null;
+export default function ArticleCard({
+  article,
+  index = 0,
+}: {
+  article: Article;
+  index?: number;
+}) {
+  const height = SPINE_HEIGHTS[index % SPINE_HEIGHTS.length];
+  const color = SPINE_COLORS[index % SPINE_COLORS.length];
 
   return (
     <Link
       href={`/articles/${article.slug.current}`}
-      className={`relative flex flex-col items-start justify-between ${hovered ? "h-[80vh] px-6 pt-8 pb-12" : "h-auto px-0 pt-0 pb-0"} cursor-pointer overflow-hidden`}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      className={`ml-4 lg:ml-0 relative w-full lg:w-8 lg:shrink-0 ${height} overflow-hidden opacity-60 hover:opacity-100 transition-opacity duration-300`}
     >
-      <AnimatePresence>
-        {hovered && bgSrc && (
-          <motion.div
-            className="absolute inset-0 z-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, filter: "blur(24px)" }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeInOut" }}
-          >
-            <Image
-              src={bgSrc}
-              alt={article.coverImage?.alt ?? ""}
-              fill
-              className="object-cover"
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <motion.h1
-        className="text-4xl font-baskerVilleOld uppercase tracking-[.25em] leading-relaxed relative z-10"
-        animate={{ color: hovered ? "#ffffff" : "#000000" }}
-        transition={{ duration: 0.3 }}
-      >
-        {article.title}
-      </motion.h1>
-
-      <span className="relative z-10">
-        {article.author && (
-          <motion.h2
-            className="text-2xl font-baskerVilleOld tracking-widest leading-relaxed"
-            animate={{ color: hovered ? "#ffffff" : "#000000" }}
-            transition={{ duration: 0.3 }}
-          >
-            {article.author.name}
-          </motion.h2>
-        )}
-        <motion.h3
-          className="text-xl font-baskervilleClassic italic tracking-wider leading-relaxed"
-          animate={{ color: hovered ? "#ffffff" : "#000000" }}
-          transition={{ duration: 0.3 }}
+      <div className="absolute inset-0 bg-[#B3F7FE]" />
+      <span className="lg:hidden absolute inset-0 flex items-center px-4">
+        <span className="font-baskervilleSC text-foreground text-sm tracking-widest truncate">
+          {article.title}
+        </span>
+      </span>
+      <span className="hidden lg:flex absolute inset-0 items-center justify-center bg-[#B3F7FE]">
+        <span
+          className="font-baskervilleSC text-foregroundtext-sm tracking-widest whitespace-nowrap"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
-          {formatDate(article.publishedAt)}
-          {article.issue && ` — LL#${article.issue.issueNumber}`}
-        </motion.h3>
+          {article.title}
+        </span>
       </span>
     </Link>
   );

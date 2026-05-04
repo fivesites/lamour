@@ -27,12 +27,7 @@ export default async function ShopPage() {
 
   return (
     <>
-    
-  
       <section className="flex flex-col mt-[25vh] w-full min-h-screen px-4 pt-8 pb-24">
-        <h1 className="font-baskerVilleOld text-5xl uppercase tracking-[0.25em] mb-12">
-          Affären
-        </h1>
         <div className="flex flex-col lg:flex-row lg:flex-wrap gap-0">
           {issues.length === 0 && (
             <p className="font-baskerVV text-foreground/40 tracking-widest">

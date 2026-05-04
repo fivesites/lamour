@@ -3,7 +3,28 @@
 import { useState } from "react";
 import { useArticles, type Series } from "@/lib/contexts/ArticlesContext";
 import ArticleCard from "@/components/ArticleCard";
-import HeroArticlePage from "@/components/HeroArticlePage";
+
+const SPINE_HEIGHTS = [
+  "h-12 lg:h-[75vh]",
+  "h-12 lg:h-[60vh]",
+  "h-12 lg:h-[80vh]",
+  "h-12 lg:h-[55vh]",
+  "h-12 lg:h-[70vh]",
+  "h-12 lg:h-[65vh]",
+];
+
+const SPINE_COLORS = [
+  "#2D4A3E",
+  "#8B1A1A",
+  "#1A3A5C",
+  "#4A3728",
+  "#3D2B5E",
+  "#1A4A2E",
+  "#5C3A1A",
+  "#2A3D5C",
+  "#4A1A2E",
+  "#1A4A4A",
+];
 
 export default function ArticlesPage() {
   const { articles, series } = useArticles();
@@ -14,39 +35,29 @@ export default function ArticlesPage() {
     : articles;
 
   return (
-    <section className="flex flex-col mt-[25vh] w-full">
-      <HeroArticlePage />
+    <section className="flex flex-col-reverse lg:flex-row lg:items-end w-full min-h-dvh lg:h-dvh p-4 gap-0 overflow-y-auto lg:overflow-hidden">
+      {series.map((s, i) => (
+        <SeriesCard
+          key={s._id}
+          series={s}
+          index={i}
+          selected={selectedSeries === s.slug.current}
+          onClick={() =>
+            setSelectedSeries(
+              selectedSeries === s.slug.current ? null : s.slug.current,
+            )
+          }
+        />
+      ))}
 
-      {series.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px border-t border-foreground mt-8">
-          {series.map((s) => (
-            <SeriesCard
-              key={s._id}
-              series={s}
-              selected={selectedSeries === s.slug.current}
-              onClick={() =>
-                setSelectedSeries(
-                  selectedSeries === s.slug.current ? null : s.slug.current
-                )
-              }
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px border-t border-foreground mt-8">
+      <div className="flex flex-col-reverse lg:flex-row lg:items-end flex-1 gap-0">
         {filteredArticles.length === 0 ? (
-          <p className="col-span-full p-4 font-baskervilleClassic italic text-foreground/40 tracking-widest">
+          <p className="font-baskervilleClassic italic text-foreground/40 tracking-widest p-4 lg:self-end lg:pb-4">
             Inga artiklar.
           </p>
         ) : (
-          filteredArticles.map((article) => (
-            <div
-              key={article._id}
-              className="border-b border-foreground p-4 md:border-r last:border-r-0"
-            >
-              <ArticleCard article={article} />
-            </div>
+          filteredArticles.map((article, i) => (
+            <ArticleCard key={article._id} article={article} index={i} />
           ))
         )}
       </div>
@@ -56,32 +67,37 @@ export default function ArticlesPage() {
 
 function SeriesCard({
   series,
+  index,
   selected,
   onClick,
 }: {
   series: Series;
+  index: number;
   selected: boolean;
   onClick: () => void;
 }) {
+  const height = SPINE_HEIGHTS[index % SPINE_HEIGHTS.length];
+  const color = SPINE_COLORS[index % SPINE_COLORS.length];
+
   return (
     <button
       onClick={onClick}
-      className={`flex flex-col items-start text-left p-6 border-b border-foreground md:border-r transition-colors duration-300 ${
-        selected ? "bg-foreground text-background" : "hover:bg-foreground/5"
-      }`}
+      className={`relative w-full lg:w-8 lg:shrink-0 ${height} overflow-hidden transition-opacity duration-300 `}
     >
-      <h2 className="text-3xl font-baskerVilleOld uppercase tracking-[.25em] leading-relaxed">
-        {series.title}
-      </h2>
-      {series.aboutText && (
-        <p
-          className={`mt-2 text-sm font-baskervilleClassic italic tracking-wider leading-relaxed ${
-            selected ? "opacity-80" : "opacity-60"
-          }`}
+      <div className="absolute inset-0 bg-[#B3F7FE]" />
+      <span className="lg:hidden absolute inset-0 flex items-center px-4">
+        <span className="font-baskervilleSC text-foreground text-sm tracking-widest truncate">
+          {series.title}
+        </span>
+      </span>
+      <span className="hidden lg:flex absolute inset-0 items-center justify-center bg-[#B3F7FE]">
+        <span
+          className="font-baskervilleSC text-foeground text-sm tracking-widest whitespace-nowrap"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
-          {series.aboutText}
-        </p>
-      )}
+          {series.title}
+        </span>
+      </span>
     </button>
   );
 }

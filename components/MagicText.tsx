@@ -3,11 +3,13 @@
 import * as React from "react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef, useMemo } from "react";
+import Image from "next/image";
 import { useScrollContainer } from "@/lib/ScrollContainerContext";
 
 export interface MagicTextProps {
   text: string;
   indent?: boolean;
+  illustrations?: { src: string; alt?: string }[];
 }
 
 interface WordProps {
@@ -29,37 +31,72 @@ const Word: React.FC<WordProps> = ({ children, progress, range }) => {
 
 /* ---------------- PRETEXT HOOK ---------------- */
 
-function usePretextWords(text: string, indent?: boolean) {
+type WordItem =
+  | { word: string; break: false; spacer: false; imageIndex?: undefined }
+  | { word: ""; break: true; spacer: false; imageIndex?: undefined }
+  | { word: ""; break: false; spacer: true; imageIndex?: undefined }
+  | { word: ""; break: false; spacer: false; imageIndex: number };
+
+function usePretextWords(text: string, indent?: boolean): WordItem[] {
   return useMemo(() => {
     if (!text) return [];
 
-    const paragraphs = text.split("\n");
+    const paragraphs = text.split("\n").filter(Boolean);
 
     return paragraphs.flatMap((p, pi) => {
-      // Split paragraph into words manually to avoid missing 'pretext' module
-      const words = p
+      const imgMatch = p.match(/^\[img:(\d+)\]$/);
+      if (imgMatch) {
+        return [
+          {
+            word: "" as const,
+            break: false as const,
+            spacer: false as const,
+            imageIndex: Number(imgMatch[1]),
+          },
+        ];
+      }
+
+      const words: WordItem[] = p
         .split(/\s+/)
         .filter(Boolean)
         .map((w) => ({
           word: w,
-          break: false,
-          spacer: false,
+          break: false as const,
+          spacer: false as const,
         }));
 
       return [
-        ...(indent ? [{ word: "", break: false, spacer: true }] : []),
+        ...(indent
+          ? [
+              {
+                word: "" as const,
+                break: false as const,
+                spacer: true as const,
+              },
+            ]
+          : []),
         ...words,
         ...(pi < paragraphs.length - 1
-          ? [{ word: "", break: true, spacer: false }]
+          ? [
+              {
+                word: "" as const,
+                break: true as const,
+                spacer: false as const,
+              },
+            ]
           : []),
-      ];
+      ] as WordItem[];
     });
   }, [text, indent]);
 }
 
 /* ---------------- MAIN COMPONENT ---------------- */
 
-export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
+export const MagicText: React.FC<MagicTextProps> = ({
+  text,
+  indent,
+  illustrations,
+}) => {
   const container = useRef(null);
   const scrollContainer = useScrollContainer();
 
@@ -74,7 +111,7 @@ export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
   return (
     <p
       ref={container}
-      className="font-baskerVV font-baskerVV fo text-[19.3px] leading-7 tracking-[0.04em] p-0"
+      className="font-baskerVV  text-[19.3px] tracking-wide leading-normal p-0 "
     >
       {allWords.map((item, i) => {
         if (item.break) return <br key={`br-${i}`} />;
@@ -83,7 +120,22 @@ export const MagicText: React.FC<MagicTextProps> = ({ text, indent }) => {
           return <span key={`indent-${i}`} className="inline-block w-16" />;
         }
 
-        const spread = 0.15; // controls overlap
+        if (item.imageIndex !== undefined) {
+          const ill = illustrations?.[item.imageIndex];
+          if (!ill) return null;
+          return (
+            <span key={`img-${i}`} className="block my-6 relative w-full h-64">
+              <Image
+                src={ill.src}
+                alt={ill.alt ?? ""}
+                fill
+                className="object-cover"
+              />
+            </span>
+          );
+        }
+
+        const spread = 0.15;
         const start = i / allWords.length;
         const end = start + spread;
 

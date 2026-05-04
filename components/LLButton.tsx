@@ -18,34 +18,31 @@ import {
 import Link from "next/link";
 import { Button } from "./ui/button";
 
-/* -------- CHARACTER SUBSTITUTIONS -------- */
+/* ─── CHARACTER SUBSTITUTIONS ─── */
 
 type Substitution = {
   char: string;
-  rotate?: string;
-  rotateZ?: number;
+  rotateDeg?: number;
   flipX?: boolean;
   flipY?: boolean;
 };
 
 const SUBSTITUTIONS: Record<string, Substitution> = {
-  S: { char: "S", rotate: "rotate-180" },
-  N: { char: "Z", rotate: "rotate-90" },
-  t: { char: "f", rotate: "-rotate-180", flipX: true },
-  M: { char: "W", rotate: "rotate-180" },
+  S: { char: "S", rotateDeg: 180 },
+  N: { char: "Z", rotateDeg: 90 },
+  t: { char: "f", rotateDeg: -180, flipX: true },
+  M: { char: "W", rotateDeg: 180 },
 };
 
-function buildTransform(sub: Substitution): CSSProperties {
+function buildFlipStyle(sub: Substitution): CSSProperties {
+  if (!sub.flipX && !sub.flipY) return {};
   const parts: string[] = [];
-  if (sub.rotateZ !== undefined) parts.push(`rotateZ(${sub.rotateZ}deg)`);
   if (sub.flipX) parts.push("scaleX(-1)");
   if (sub.flipY) parts.push("scaleY(-1)");
-  return parts.length
-    ? { transform: parts.join(" "), display: "inline-block" }
-    : {};
+  return { transform: parts.join(" "), display: "inline-block" };
 }
 
-/* -------- MONO MEASUREMENT -------- */
+/* ─── MONO MEASUREMENT ─── */
 
 function measureMonoScales(
   chars: string[],
@@ -64,190 +61,217 @@ function measureMonoScales(
   return result;
 }
 
-/* -------- TEXT PARSER -------- */
+/* ─── TEXT PARSER ─── */
 
 function parseChars(text: string) {
   return text.split("").map((char) => ({ char, isSpace: char === " " }));
 }
 
-/* -------- ANIMATED CHAR -------- */
+/* ─── TYPES ─── */
+
+export type EffectType =
+  | "default"
+  | "letterSwap"
+  | "stretch"
+  | "wiggle"
+  | "justify"
+  | "mono";
+
+export type LLTextProps = {
+  text: string;
+  /** Animation effect preset. */
+  effect?: EffectType;
+  /** Adds a slight random rotation offset to each letter on top of any effect. */
+  wiggle?: boolean;
+  /** true = items-center (default), false = items-baseline. */
+  verticalTrim?: boolean;
+  /** scaleX target for "stretch" effect. */
+  stretch?: number;
+  /** scaleY target for "stretch" effect. */
+  stretchY?: number;
+  /** Legacy: use effect="mono" instead. Still supported for backward compat. */
+  mono?: boolean;
+  monoFont?: string;
+  /** Width of a space character. */
+  gap?: string;
+  className?: string;
+  animProgress?: MotionValue<number>;
+};
+
+type LLButtonProps = LLTextProps & {
+  href?: string;
+} & ComponentProps<typeof Button>;
+
+const EASE = [0.25, 0.46, 0.45, 0.94] as const;
+const DURATION = 0.5;
+const HOVER_GAP_PX = 6;
+
+/* ─── ANIMATED CHAR ─── */
 
 function AnimChar({
   char,
+  effect,
   progress,
   targetScaleX,
   targetScaleY,
-  rotateCls,
   subStyle,
-  wiggleRotate,
-  wiggleActive,
+  finalRotation,
   rotateDistortion,
+  wiggleOffset,
+  hoverActive,
   staggerIndex,
-  wiggleFactor,
 }: {
   char: string;
+  effect?: EffectType;
   progress: MotionValue<number>;
   targetScaleX: number;
   targetScaleY: number;
-  rotateCls: string;
   subStyle: CSSProperties;
-  wiggleRotate?: boolean;
-  wiggleActive?: boolean;
-  rotateDistortion?: number;
-  staggerIndex?: number;
-  wiggleFactor?: number;
+  finalRotation?: number;
+  rotateDistortion: number;
+  wiggleOffset: number;
+  hoverActive: boolean;
+  staggerIndex: number;
 }) {
   const scaleX = useTransform(progress, (p) => 1 + (targetScaleX - 1) * p);
   const scaleY = useTransform(progress, (p) => 1 + (targetScaleY - 1) * p);
-  const f = wiggleFactor ?? 1;
+  const charMx = useTransform(
+    progress,
+    (p) => `${Math.max(0, (targetScaleX - 1) * p * 0.3)}em`,
+  );
 
-  const animateTarget =
-    wiggleRotate && rotateDistortion !== undefined
-      ? { rotate: wiggleActive ? rotateDistortion * f : 0 }
-      : undefined;
+  // Compute rotation targets composing effect rotation + wiggle offset
+  let rotateTarget: number | undefined;
+  let rotateInitial: number | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let rotateTransition: any;
+
+  if (effect === "letterSwap") {
+    const base = finalRotation ?? 0;
+    if (base !== 0 || wiggleOffset !== 0) {
+      rotateInitial = 0;
+      rotateTarget = base + wiggleOffset;
+      rotateTransition = {
+        duration: DURATION,
+        ease: EASE,
+        delay: staggerIndex * 0.04,
+      };
+    }
+  } else if (effect === "wiggle") {
+    // on load: 0 → distortion+offset; hover: back to offset
+    rotateInitial = wiggleOffset;
+    rotateTarget = hoverActive ? wiggleOffset : rotateDistortion + wiggleOffset;
+    rotateTransition = {
+      duration: 0.22,
+      ease: "easeOut",
+      delay: !hoverActive ? staggerIndex * 0.025 : 0,
+    };
+  } else if (effect === "justify") {
+    // default: offset; hover: distortion+offset
+    rotateTarget = hoverActive
+      ? rotateDistortion + wiggleOffset
+      : wiggleOffset;
+    rotateTransition = {
+      duration: 0.22,
+      ease: "easeOut",
+      delay: hoverActive ? staggerIndex * 0.025 : 0,
+    };
+    if (wiggleOffset !== 0) rotateInitial = 0;
+  } else if (wiggleOffset !== 0) {
+    // wiggle prop only, no rotation-based effect
+    rotateInitial = 0;
+    rotateTarget = wiggleOffset;
+    rotateTransition = {
+      duration: DURATION,
+      ease: EASE,
+      delay: staggerIndex * 0.04,
+    };
+  }
+
+  const usesScale =
+    effect === "stretch" || effect === "mono" || (effect === undefined && targetScaleX !== 1);
 
   return (
     <motion.span
-      className={`inline-block origin-center leading-none [text-box-trim:both] [text-box-edge:cap_alphabetic] ${rotateCls}`}
-      style={{ ...subStyle, scaleX, scaleY }}
-      animate={animateTarget}
-      transition={
-        wiggleRotate
-          ? {
-              duration: 0.18,
-              ease: "easeOut" as const,
-              delay: wiggleActive ? (staggerIndex ?? 0) * 0.015 : 0,
-            }
-          : undefined
-      }
+      className="inline-block origin-center leading-none [text-box-trim:both] [text-box-edge:cap_alphabetic]"
+      style={{
+        ...subStyle,
+        ...(usesScale && { scaleX, scaleY }),
+        ...(usesScale && {
+          marginLeft: charMx,
+          marginRight: charMx,
+        }),
+      }}
+      initial={rotateInitial !== undefined ? { rotate: rotateInitial } : undefined}
+      animate={rotateTarget !== undefined ? { rotate: rotateTarget } : undefined}
+      transition={rotateTransition}
     >
       {char}
     </motion.span>
   );
 }
 
-/* -------- TYPES -------- */
-
-export type LLTextProps = {
-  text: string;
-  /** scaleX target (e.g. 2 = 200%). Animated via progress. */
-  stretch?: number;
-  /** scaleY target. Animated via progress. */
-  stretchY?: number;
-  /** Animate letter-spacing from center-clustered to fully justified. */
-  justify?: boolean;
-  /** Apply character substitutions (S→rotated S, etc.) */
-  rotate?: boolean;
-  /** Make all characters equal width using canvas measurement. */
-  mono?: boolean;
-  monoFont?: string;
-  /** Width of a space character (not animated). */
-  gap?: string;
-  className?: string;
-  /** External 0-1 motion value that drives all animation. */
-  animProgress?: MotionValue<number>;
-};
-
-const EASE = [0.25, 0.46, 0.45, 0.94] as const;
-const DURATION = 0.5;
-
-type LLButtonProps = LLTextProps & {
-  /** Animate effect from 0→1 on mount. */
-  revealAnimation?: boolean;
-  /** Animate stretch/justify on hover. */
-  hover?: boolean;
-  /** Start with effect fully applied. Hover reverses it. */
-  active?: boolean;
-  /** Per-letter random rotation on hover. */
-  wiggleRotate?: boolean;
-  /** Wiggle intensity grows from left to right. */
-  wiggleGradient?: boolean;
-  /** Render as a Next.js Link. */
-  href?: string;
-} & ComponentProps<typeof Button>;
-
-/* -------- COMPONENT -------- */
+/* ─── COMPONENT ─── */
 
 export default function LLButton({
   text,
-  stretch,
-  stretchY,
-  justify = false,
-  rotate = false,
+  effect,
+  wiggle = false,
+  verticalTrim = true,
+  stretch = 2,
+  stretchY = 1,
   mono = false,
   monoFont = "Baskerville, 'Baskerville Old Face', serif",
   gap = "0.35em",
   className,
   animProgress,
-  revealAnimation,
-  hover,
-  active = false,
-  wiggleRotate = false,
-  wiggleGradient = false,
   href,
   ...buttonProps
 }: LLButtonProps) {
-  // --- stretch / justify progress ---
-  const ownProgress = useMotionValue(active ? 1 : 0);
+  const usesMono = effect === "mono" || mono;
+  const usesScale = effect === "stretch" || effect === "mono" || mono;
+
+  /* progress drives stretch / mono / justify spreading */
+  const ownProgress = useMotionValue(0);
   const progress = animProgress ?? ownProgress;
-  const restRef = useRef(active ? 1 : 0);
 
   useEffect(() => {
-    if (!revealAnimation) return;
-    ownProgress.set(0);
-    animate(ownProgress, 1, { duration: DURATION, ease: EASE });
-    restRef.current = 1;
+    if (effect === "stretch" || effect === "justify" || effect === "mono") {
+      animate(ownProgress, 1, { duration: DURATION, ease: EASE });
+    } else if (mono && !effect) {
+      // legacy mono prop: immediate, no animation
+      ownProgress.set(1);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- wiggle ---
-  const [wiggleHovered, setWiggleHovered] = useState(false);
-  const rotateDistortions = useRef<number[]>([]);
-  const [mounted, setMounted] = useState(false);
+  /* hover */
+  const [hoverActive, setHoverActive] = useState(false);
 
+  /* letterSwap hover gap */
+  const hoverGapMV = useMotionValue(0);
+  const hoverGapStr = useTransform(hoverGapMV, (g: number) => `${g}px`);
+
+  /* random per-letter values */
+  const rotateDistortions = useRef<number[]>([]); // large ±7° for wiggle/justify effects
+  const wiggleOffsets = useRef<number[]>([]);      // small ±3° for wiggle prop modifier
   useEffect(() => {
     rotateDistortions.current = text
       .split("")
       .map(() => parseFloat((Math.random() * 14 - 7).toFixed(1)));
-    setMounted(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    wiggleOffsets.current = text
+      .split("")
+      .map(() => parseFloat((Math.random() * 6 - 3).toFixed(1)));
+  }, [text]);
 
-  const wiggleActive = wiggleRotate && mounted && (active || wiggleHovered);
-
-  // --- hover handlers ---
-  const handleHoverStart = () => {
-    if (hover) {
-      restRef.current = ownProgress.get();
-      const target = restRef.current > 0.5 ? 0 : 1;
-      animate(ownProgress, target, { duration: DURATION, ease: EASE });
-    }
-    if (wiggleRotate) setWiggleHovered(true);
-  };
-
-  const handleHoverEnd = () => {
-    if (hover) {
-      animate(ownProgress, restRef.current, { duration: DURATION, ease: EASE });
-    }
-    if (wiggleRotate) setWiggleHovered(false);
-  };
-
-  // --- justify measurement ---
+  /* justify: measure container vs natural text width to compute max gap */
   const pretextRef = useRef<HTMLSpanElement>(null);
   const containerRef = useRef<HTMLSpanElement>(null);
   const maxGapMV = useMotionValue(0);
-
   const parsed = useMemo(() => parseChars(text), [text]);
 
-  const [monoScales, setMonoScales] = useState<Record<string, number>>({});
   useEffect(() => {
-    if (!mono) return;
-    const uniqueChars = [...new Set(parsed.map((c) => c.char))];
-    setMonoScales(measureMonoScales(uniqueChars, monoFont));
-  }, [mono, monoFont, parsed]);
-
-  useEffect(() => {
-    if (!justify) return;
+    if (effect !== "justify") return;
     const measure = () => {
       const pretext = pretextRef.current;
       const container = containerRef.current;
@@ -266,25 +290,57 @@ export default function LLButton({
     const ro = new ResizeObserver(measure);
     if (containerRef.current) ro.observe(containerRef.current);
     return () => ro.disconnect();
-  }, [justify, parsed, maxGapMV]);
+  }, [effect, parsed, maxGapMV]);
 
   const columnGap = useTransform(
     [progress, maxGapMV] as MotionValue[],
-    ([p, maxG]: number[]) => (justify ? p * maxG : 0),
+    ([p, maxG]: number[]) => (effect === "justify" ? p * maxG : 0),
   );
 
-  const hasCharAnimation =
-    mono ||
-    (stretch !== undefined && stretch !== 1) ||
-    (stretchY !== undefined && stretchY !== 1);
+  /* mono scales */
+  const [monoScales, setMonoScales] = useState<Record<string, number>>({});
+  useEffect(() => {
+    if (!usesMono) return;
+    const uniqueChars = [...new Set(parsed.map((c) => c.char))];
+    setMonoScales(measureMonoScales(uniqueChars, monoFont));
+  }, [usesMono, monoFont, parsed]);
 
-  // --- render ---
+  /* hover handlers */
+  const handleHoverStart = () => {
+    if (effect === "stretch" || effect === "mono") {
+      animate(ownProgress, 0, { duration: DURATION, ease: EASE });
+    } else if (effect === "letterSwap") {
+      animate(hoverGapMV, HOVER_GAP_PX, { duration: DURATION, ease: EASE });
+    } else if (effect === "wiggle" || effect === "justify") {
+      setHoverActive(true);
+    }
+  };
+
+  const handleHoverEnd = () => {
+    if (effect === "stretch" || effect === "mono") {
+      animate(ownProgress, 1, { duration: DURATION, ease: EASE });
+    } else if (effect === "letterSwap") {
+      animate(hoverGapMV, 0, { duration: DURATION, ease: EASE });
+    } else if (effect === "wiggle" || effect === "justify") {
+      setHoverActive(false);
+    }
+  };
+
+  const containerGap =
+    effect === "justify"
+      ? columnGap
+      : effect === "letterSwap"
+        ? hoverGapStr
+        : undefined;
+
   const inner = (
     <span
       ref={containerRef}
-      className="font-baskerVilleOld relative flex items-center w-full justify-center"
+      className={`font-baskerVilleOld relative flex ${
+        verticalTrim ? "items-center" : "items-baseline"
+      } w-full justify-center`}
     >
-      {justify && (
+      {effect === "justify" && (
         <span
           ref={pretextRef}
           className="absolute opacity-0 pointer-events-none whitespace-nowrap"
@@ -293,44 +349,38 @@ export default function LLButton({
           {text}
         </span>
       )}
+      {/* justify needs w-full so chars spread from edge to edge */}
       <motion.span
-        className="flex items-center justify-center"
-        style={{ columnGap }}
+        className={`flex items-center justify-center${effect === "justify" ? " w-full" : ""}`}
+        style={{ columnGap: containerGap }}
       >
         {parsed.map((item, i) => {
           if (item.isSpace) {
             return <span key={i} style={{ width: gap }} aria-hidden />;
           }
 
-          const sub = rotate ? SUBSTITUTIONS[item.char] : undefined;
+          const sub =
+            effect === "letterSwap" ? SUBSTITUTIONS[item.char] : undefined;
           const displayChar = sub?.char ?? item.char;
-          const rotateCls = sub?.rotate ?? "";
-          const subStyle = sub ? buildTransform(sub) : {};
-          const targetScaleX = mono
-            ? (monoScales[item.char] ?? 1)
-            : (stretch ?? 1);
-          const targetScaleY = stretchY ?? 1;
-          const wiggleFactor = wiggleGradient
-            ? i / Math.max(parsed.length - 1, 1)
-            : 1;
+          const subStyle = sub ? buildFlipStyle(sub) : {};
+          const targetScaleX = usesMono ? (monoScales[item.char] ?? 1) : stretch;
+          const wo = wiggle ? (wiggleOffsets.current[i] ?? 0) : 0;
 
-          if (hasCharAnimation || wiggleRotate) {
+          if (effect || mono || wiggle) {
             return (
               <AnimChar
                 key={i}
                 char={displayChar}
+                effect={effect}
                 progress={progress}
                 targetScaleX={targetScaleX}
-                targetScaleY={targetScaleY}
-                rotateCls={rotateCls}
+                targetScaleY={stretchY}
                 subStyle={subStyle}
-                wiggleRotate={wiggleRotate}
-                wiggleActive={wiggleActive}
-                rotateDistortion={
-                  wiggleRotate ? rotateDistortions.current[i] : undefined
-                }
+                finalRotation={sub?.rotateDeg}
+                rotateDistortion={rotateDistortions.current[i] ?? 0}
+                wiggleOffset={wo}
+                hoverActive={hoverActive}
                 staggerIndex={i}
-                wiggleFactor={wiggleFactor}
               />
             );
           }
@@ -338,7 +388,7 @@ export default function LLButton({
           return (
             <span
               key={i}
-              className={`inline-block origin-center leading-none [text-box-trim:both] [text-box-edge:cap_alphabetic] ${rotateCls}`}
+              className="inline-block origin-center leading-none [text-box-trim:both] [text-box-edge:cap_alphabetic]"
               style={subStyle}
             >
               {displayChar}
@@ -352,7 +402,7 @@ export default function LLButton({
   return (
     <Button
       variant="link"
-      className={`w-full ${className ?? ""}`}
+      className={`w-full active:opacity-80 ${effect === "default" ? "hover:text-foreground/40 transition-colors" : ""} ${className ?? ""}`}
       onMouseEnter={handleHoverStart}
       onMouseLeave={handleHoverEnd}
       asChild={!!href}

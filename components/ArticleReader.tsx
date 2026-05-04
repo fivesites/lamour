@@ -8,35 +8,40 @@ import SanityPortableText from "@/components/SanityPortableText";
 import { urlFor } from "@/lib/sanity/image";
 import Link from "next/link";
 import Image from "next/image";
+import LLButton from "./LLButton";
 
 type ArticleReaderProps = {
   title: string;
   body?: any[];
   plainText: string;
+  illustrations?: { src: string; alt?: string }[];
   author?: {
     name: string;
     slug: { current: string };
     image?: { asset: any; alt?: string };
   };
   issue?: { title: string; issueNumber: number; slug: { current: string } };
+  coverImage?: { asset: any; alt?: string };
   publishedAt?: string;
 };
 
 function formatDate(dateStr?: string) {
   if (!dateStr) return null;
-  return new Date(dateStr).toLocaleDateString("sv-SE", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const d = new Date(dateStr);
+  const month = d.toLocaleDateString("en-US", { month: "long" }).toLowerCase();
+  const day = d.getDate();
+  const year = d.getFullYear();
+  return `${month}, ${day}, ${year}`;
 }
 
 export default function ArticleReader({
   title,
   body,
   plainText,
+  illustrations,
   author,
   issue,
+  coverImage,
   publishedAt,
 }: ArticleReaderProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -50,62 +55,65 @@ export default function ArticleReader({
       transition={{ duration: 0.4 }}
     >
       <ScrollContainerContext.Provider value={scrollRef}>
-        <article className="max-w-2xl mx-auto px-4 pt-[25vh] pb-32">
-          <Link
+        <article className="flex flex-col lg:flex-row lg:gap-x-4 px-4 pt-4 pb-32 max-w-7xl ">
+          <LLButton
+            text="X"
             href="/articles"
-            className="font-baskerVilleOld text-xl tracking-widest text-foreground/40 hover:text-foreground transition-colors mb-10 inline-block"
-          >
-            ← Artiklar
-          </Link>
+            className="fixed top-0 right-0 z-50 h-16 items-baseline aspect-square justify-center rounded-none gap-0 p-4 bg-background/10 backdrop-blur-sm text-4xl font-baskerVilleOld w-min"
+          />
 
-          {issue && (
-            <p className="font-mono text-foreground/40 tracking-widest text-sm uppercase mb-3">
-              <Link
-                href={`/shop/${issue.slug?.current}`}
-                className="hover:text-foreground transition-colors"
-              >
-                LL#{issue.issueNumber} — {issue.title}
-              </Link>
-            </p>
+          {coverImage?.asset && (
+            <div className="relative w-1/2 aspect-3/4 lg:w-full h-[50vh] mb-4">
+              <Image
+                src={urlFor(coverImage).url()}
+                alt={coverImage.alt ?? title}
+                fill
+                className="object-contain object-top-left"
+              />
+            </div>
           )}
-
-          <h1 className="font-baskerVilleOld text-4xl md:text-5xl uppercase tracking-[0.2em] leading-tight mb-6">
-            {title}
-          </h1>
-
-          <div className="flex items-center gap-4 mb-12 border-b border-foreground pb-6">
-            {author?.image?.asset && (
-              <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0">
-                <Image
-                  src={urlFor(author.image).width(80).url()}
-                  alt={author.image.alt ?? author.name}
-                  fill
-                  className="object-cover"
-                />
-              </div>
+          <div className="col-span-2">
+            {issue && (
+              <p className="font-mono text-foreground/40 tracking-widest text-sm uppercase mb-3">
+                <Link
+                  href={`/shop/${issue.slug?.current}`}
+                  className="hover:text-foreground transition-colors"
+                >
+                  LL#{issue.issueNumber} — {issue.title}
+                </Link>
+              </p>
             )}
-            <div>
+
+            <h1 className="font-baskervilleSC text-3xl lg:text-5xl  tracking-widest leading-normal mb-6 max-w-3xl">
+              {title}
+            </h1>
+
+            <div className="flex flex-col items-start gap-0 mb-16 pb-6 w-full max-w-xl justify-start">
               {author && (
                 <Link
                   href={`/authors/${author.slug.current}`}
-                  className="font-baskerVilleOld text-xl tracking-widest hover:opacity-60 transition-opacity"
+                  className="font-baskerVV text-lg lg:text-xl tracking-widest hover:opacity-60 transition-opacity mb-2"
                 >
                   {author.name}
                 </Link>
               )}
               {publishedAt && (
-                <p className="font-baskervilleClassic italic text-sm tracking-wide text-foreground/60">
+                <p className="font-baskervilleClassic italic text-base tracking-widest ">
                   {formatDate(publishedAt)}
                 </p>
               )}
             </div>
-          </div>
 
-          {plainText ? (
-            <MagicText text={plainText} indent />
-          ) : body ? (
-            <SanityPortableText value={body} />
-          ) : null}
+            {plainText ? (
+              <MagicText
+                text={plainText}
+                indent
+                illustrations={illustrations}
+              />
+            ) : body ? (
+              <SanityPortableText value={body} />
+            ) : null}
+          </div>
         </article>
       </ScrollContainerContext.Provider>
     </motion.div>

@@ -1,9 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Card, CardContent, CardFooter, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import Stretch from "./Stretch";
 import LLButton from "./LLButton";
+import { useCart } from "@/lib/contexts/CartContext";
 
 function PriceButton({ price }: { price: string }) {
   return (
@@ -41,32 +44,23 @@ export default function ProductCard({
   description,
   truncate = false,
 }: ProductCardProps) {
+  const { addToCart } = useCart();
   const header = (
     <div className="">
       {articleID && (
-        <span className="flex items-center font-mono text-foreground/40 tracking-widest whitespace-nowrap text-lg gap-x-0">
+        <span className="flex items-baseline gap-x-2 font-mono text-foreground/40 tracking-widest whitespace-nowrap text-3xl gap-x-0">
           LL#{articleID}
+          <CardTitle className="text-3xl font-baskervilleSC font-normal tracking-wider">
+            {title}
+          </CardTitle>
         </span>
       )}
       {/* <span className="flex-1 self-center block h-px bg-black min-w-8" /> */}
-      <CardTitle className="text-4xl font-baskerVilleOld font-normal">
-        {title}
-      </CardTitle>
     </div>
   );
 
   return (
     <Card className="uppercase w-full gap-0 p-2 rounded-none  font-baskerVilleOld bg-transparent flex flex-col ">
-      <CardContent className="flex flex-col w-full justify-start items-start p-0">
-        {href ? (
-          <Link href={href} className="hover:opacity-60 transition-opacity">
-            {header}
-          </Link>
-        ) : (
-          header
-        )}
-        <PriceButton price={price} />
-      </CardContent>
       {variant === "default" && image && (
         <div className={`relative w-full ${imageSize}`}>
           <Image
@@ -77,6 +71,16 @@ export default function ProductCard({
           />
         </div>
       )}
+      <CardContent className="flex flex-col w-full justify-start items-start p-0">
+        {href ? (
+          <Link href={href} className="hover:opacity-60 transition-opacity">
+            {header}
+          </Link>
+        ) : (
+          header
+        )}
+        <PriceButton price={price} />
+      </CardContent>
       {description && (
         <div className="w-full pt-2">
           <p
@@ -96,10 +100,14 @@ export default function ProductCard({
         </div>
       )}
       <CardFooter className="py-2 px-0 flex items-center justify-end lg:justify-start">
-        <LLButton
-          text="(Lägg i korg)"
-          className="font-baskerVilleClassic uppercase text-xl justify-end w-min whitespace-normal  tracking-widest lg:justify-start  p-0"
-        />
+        <span className="inline-flex rounded-[100%] bg-foreground overflow-hidden hover:opacity-75 transition-opacity">
+          <LLButton
+            text="Lägg i korg"
+            variant="ghost"
+            className="font-baskerVilleClassic text-xl tracking-widest text-background hover:bg-transparent hover:text-background px-8 py-2 h-auto w-full lg:w-auto rounded-full"
+            onClick={() => addToCart({ id: articleID ?? title, title, price })}
+          />
+        </span>
       </CardFooter>
     </Card>
   );

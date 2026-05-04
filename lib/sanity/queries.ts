@@ -1,5 +1,11 @@
 import { groq } from "next-sanity";
 
+export const latestIssueQuery = groq`*[_type == "issue"] | order(issueNumber desc)[0] {
+  _id,
+  title,
+  coverImage
+}`;
+
 export const issuesQuery = groq`*[_type == "issue"] | order(issueNumber desc) {
   _id,
   title,
@@ -52,7 +58,8 @@ export const articleBySlugQuery = groq`*[_type == "article" && slug.current == $
   "issue": issue->{title, issueNumber, slug},
   "series": series->{title, slug},
   body,
-  publishedAt
+  publishedAt,
+  coverImage { asset->, alt }
 }`;
 
 export const authorBySlugQuery = groq`*[_type == "author" && slug.current == $slug][0] {

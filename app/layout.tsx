@@ -1,16 +1,25 @@
 import type { Metadata } from "next";
-import { Baskervville } from "next/font/google";
+import { Baskervville, Baskervville_SC } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import LLNav from "@/components/LLNav";
+import CartDrawer from "@/components/CartDrawer";
 import { client } from "@/lib/sanity/client";
 import { issuesQuery, articlesQuery, seriesQuery } from "@/lib/sanity/queries";
 import { IssuesProvider } from "@/lib/contexts/IssuesContext";
 import { ArticlesProvider } from "@/lib/contexts/ArticlesContext";
+import { CartProvider } from "@/lib/contexts/CartContext";
 import type { Issue } from "@/lib/contexts/IssuesContext";
 import type { Article, Series } from "@/lib/contexts/ArticlesContext";
 
 export const revalidate = 3600;
+
+const baskervilleSC = Baskervville_SC({
+  variable: "--font-baskervilleSC",
+  display: "swap",
+  weight: "400",
+  subsets: ["latin"],
+});
 
 const baskerville = Baskervville({
   variable: "--font-baskerville",
@@ -58,14 +67,17 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${baskerville.variable} ${baskervilleOldFace.variable} ${baskervilleClassic.variable} antialiased`}
+        className={`${baskerville.variable} ${baskervilleOldFace.variable} ${baskervilleClassic.variable} ${baskervilleSC.variable} antialiased`}
       >
-        <IssuesProvider issues={issues}>
-          <ArticlesProvider articles={articles} series={series}>
-            <LLNav />
-            {children}
-          </ArticlesProvider>
-        </IssuesProvider>
+        <CartProvider>
+          <IssuesProvider issues={issues}>
+            <ArticlesProvider articles={articles} series={series}>
+              <LLNav />
+              {children}
+            </ArticlesProvider>
+          </IssuesProvider>
+          <CartDrawer />
+        </CartProvider>
       </body>
     </html>
   );
