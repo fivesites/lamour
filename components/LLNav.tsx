@@ -9,6 +9,7 @@ import { useIssues } from "@/lib/contexts/IssuesContext";
 import { useArticles } from "@/lib/contexts/ArticlesContext";
 import { useCart } from "@/lib/contexts/CartContext";
 import Stretch from "./Stretch";
+import Link from "next/link";
 
 /* ─── ARTICLE SUBMENU ─── */
 
@@ -21,34 +22,25 @@ function ArticleSubMenu({
   const [openSeries, setOpenSeries] = useState(false);
   return (
     <div className="flex flex-col items-start justify-start whitespace-normal w-full max-h-[60vh] overflow-y-auto">
-      <div className="flex flex-col pt-2  w-full">
-        <span className="flex justify-between w-full border-b border-b-foreground py-2 mb-2 px-4">
-          <LLButton
-            text="Liveblog från Bokmässan 2025"
-            className="font-baskervilleSC text-4xl w-full justify-start"
+      <div className="flex flex-col pt-2  items-start justify-start w-full">
+        <span className="flex items-start justiify-start text-left whitespace-normal w-full border-b border-b-foreground py-2 mb-2 px-8">
+          <button
+            className="font-baskervilleSC text-2xl w-full justify-start whitespace-normal flex flex-wrap items-start text-left"
             onClick={() => setOpenSeries(true)}
-          />
-          <LLButton
-            href="/articles"
-            text="V"
-            className={`font-baskerVilleOld text-4xl w-min  ${openSeries ? "rotate-0" : "-rotate-90"}`}
-            onClick={() => setOpenSeries(!openSeries)}
-          />
+          >
+            Liveblog från Bokmässan 2025
+          </button>
         </span>
         {openSeries && (
-          <div className="pl-4">
+          <div className="pl-0">
             {articles.map((article) => (
-              <div
+              <Link
+                className=" font-baskervilleSC text-2xl tracking-wider py-2 gap-x-4 flex border-b border-b-foreground px-12 w-full"
+                href={`/articles/${article.slug.current}`}
                 key={article._id}
-                className="w-full border-b border-b-foreground"
               >
-                <LLButton
-                  href={`/articles/${article.slug.current}`}
-                  text={article.title}
-                  className="font-baskerVilleOld text-4xl justify-start w-full py-2 rounded-none"
-                  onClick={() => setNavOpen(false)}
-                />
-              </div>
+                {article.title}
+              </Link>
             ))}
           </div>
         )}
@@ -59,18 +51,31 @@ function ArticleSubMenu({
 
 function ShopSubMenu() {
   const issues = useIssues();
+  const { setDrawerOpen } = useCart();
   return (
-    <div className="flex flex-col items-start justify-start whitespace-normal w-full max-h-[60vh] overflow-y-auto border-b border-b-foreground">
-      <div className="flex flex-col px-4 w-full">
+    <div className="flex flex-col items-start justify-start whitespace-normal w-full max-h-[60vh] overflow-y-auto ">
+      <div className="flex flex-col w-full">
         {issues.map((issue) => (
-          <ProductCard
+          <div
             key={issue._id}
-            variant="noIMG"
-            articleID={String(issue.issueNumber)}
-            title={issue.title}
-            href={`/shop/${issue.slug.current}`}
-            price={issue.price ? String(Math.round(issue.price / 100)) : "—"}
-          />
+            className="relative flex items-center w-full border-b border-b-foreground px-8  py-2"
+          >
+            <Link
+              className=" font-baskervilleSC text-2xl tracking-wider gap-x-4 flex "
+              href={`/shop/${issue.slug.current}`}
+              key={issue._id}
+            >
+              <span className="lowercase">LL{issue.issueNumber}</span>
+              {issue.title}
+            </Link>
+
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="absolute right-6 text-3xl font-baskervilleSC"
+            >
+              +
+            </button>
+          </div>
         ))}
       </div>
     </div>
@@ -105,11 +110,11 @@ function DesktopNav({
   return (
     <AnimatePresence>
       {navOpen && (
-        <div className="hidden lg:flex flex-col w-full">
+        <div className="hidden lg:flex justify-between w-full">
           {/* NAV ROW */}
           <motion.div
             layout
-            className="flex flex-col items-baseline gap-x-8 gap-y-2 w-full py-4 px-4 "
+            className="flex flex-col items-baseline gap-x-8 gap-y-4 w-full py-4 px-4 "
             initial="hidden"
             animate="visible"
             exit="hidden"
@@ -121,7 +126,7 @@ function DesktopNav({
             <motion.div variants={ITEM_VARIANTS}>
               <LLButton
                 href="/shop"
-                text={`Affären(${issues.length})`}
+                text={`Shop / Alla nummer`}
                 className="font-baskerVilleOld text-3xl tracking-wider w-min"
                 onClick={() => {
                   setOpenShopSubMenu(!openShopSubMenu);
@@ -133,8 +138,8 @@ function DesktopNav({
             <motion.div variants={ITEM_VARIANTS}>
               <LLButton
                 href="/articles"
-                text={`Artiklar(${articles.length})`}
-                className="font-baskerVilleOld text-3xl tracking-widerw-min"
+                text={`Alla artiklar`}
+                className="font-baskerVilleOld text-3xl tracking-wider w-min"
                 onClick={() => {
                   setOpenArticleSubMenu(!openArticleSubMenu);
                   setOpenShopSubMenu(false);
@@ -189,47 +194,40 @@ export default function LLNav() {
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full flex flex-col items-center justify-start gap-0 pb-0 z-50 transition-colors   duration-500 ${navOpen ? "min-h-dvh bg-background lg:min-h-auto" : "min-h-auto"}`}
+      className={`fixed top-0 left-0 w-full flex flex-col items-center justify-start gap-0 pb-0 z-50 transition-colors   duration-500 ${navOpen ? "min-h-dvh bg-background lg:bg-transparent lg:min-h-auto" : "min-h-auto"}`}
     >
       {/* HEADER ROW */}
-      <div className="w-full flex justify-between items-baseline h-full ">
-        <motion.div className="flex items-baseline justify-between w-full h-full font-baskerville pt-0 px-0 whitespace-nowrap">
-          <div className="flex items-center">
-            <LLButton
-              text={navOpen ? "X" : "II"}
-              onClick={() => setNavOpen(!navOpen)}
-              className={`flex h-16 items-baseline aspect-square justify-center rounded-none gap-0 p-4 text-4xl w-min ${
-                navOpen ? "rotate-0" : "rotate-90"
-              }`}
-            />
-
-            <LLButton
-              href="/"
-              text="L'Amour"
-              className="text-4xl w-min justify-start ml-4 tracking-wider"
-              effect="default"
-            />
-            <span className="self-center block h-px bg-black w-8 mx-2" />
-            <LLButton
-              href="/"
-              text="La Mort"
-              className="text-4xl w-min justify-start tracking-wider"
-              effect="default"
-            />
-          </div>
-          <motion.button
-            key={totalItems}
-            className="hidden lg:inline-flex font-baskerVilleOld text-4xl items-baseline px-3 mr-1 hover:opacity-50 transition-opacity"
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            onClick={() => setDrawerOpen(true)}
-            aria-label="Öppna korg"
-          >
-            <span>(</span>
-            <Stretch text={`${totalItems}`} size="text-4xl" />
-            <span>)</span>
-          </motion.button>
+      <div className="w-full flex justify-between items-baseline h-full lg:pr-16">
+        <motion.div
+          className={`flex items-baseline h-full font-baskerville pt-0 px-0 whitespace-nowrap ${navOpen ? "justify-between" : "justify-start"}`}
+          initial={{ width: "min-content" }}
+          animate={{ width: navOpen ? "calc(100% - 3rem)" : "min-content" }}
+          transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <LLButton
+            text={navOpen ? "X" : "II"}
+            onClick={() => setNavOpen(!navOpen)}
+            className={`flex h-16 items-baseline aspect-square justify-center rounded-none gap-0 p-4 text-4xl w-min ${
+              navOpen ? "rotate-0" : "rotate-90"
+            }`}
+          />
+          <LLButton
+            href="/"
+            text="L'Amour"
+            className="text-4xl w-min justify-start mr-2 ml-4 tracking-wider"
+            effect="default"
+          />
+          <motion.span
+            className="self-center block h-px bg-black min-w-8"
+            animate={{ flexGrow: navOpen ? 1 : 0 }}
+            transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+          />
+          <LLButton
+            href="/"
+            text="La Mort"
+            className="text-4xl w-min justify-start ml-2 tracking-wider"
+            effect="default"
+          />
         </motion.div>
       </div>
 
@@ -242,6 +240,16 @@ export default function LLNav() {
         openArticleSubMenu={openArticleSubMenu}
         setOpenArticleSubMenu={setOpenArticleSubMenu}
       />
+
+      <button className="fixed bottom-0 right-0 hidden lg:block">
+        <span className="inline-flex rounded-[50%] bg-foreground overflow-hidden self-stretch -rotate-12 mb-5">
+          <Stretch
+            text="Prenumerera"
+            className="tracking-widest text-background px-16 py-4 lg:py-4 "
+            size="text-2xl"
+          />
+        </span>
+      </button>
 
       {/* MOBILE NAV */}
       <AnimatePresence>
@@ -261,7 +269,7 @@ export default function LLNav() {
                 <div className="flex gap-x-0">
                   <LLButton
                     href="/shop"
-                    text={`Affären`}
+                    text={`Shop / Alla nummer`}
                     className="font-baskerVilleOld text-4xl w-min"
                     onClick={() => setOpenShopSubMenu(!openShopSubMenu)}
                   />
@@ -284,7 +292,7 @@ export default function LLNav() {
                 <div className="flex gap-x-0">
                   <LLButton
                     href="/articles"
-                    text={`Artiklar`}
+                    text={`Alla artiklar`}
                     className="font-baskerVilleOld text-4xl w-min"
                     onClick={() => setOpenArticleSubMenu(!openArticleSubMenu)}
                   />
@@ -304,48 +312,48 @@ export default function LLNav() {
               </AnimatePresence>
             </motion.li>
 
-            <motion.li className="w-full pt-4 px-4" variants={ITEM_VARIANTS}>
+            {/* <motion.li className=" w-full pt-4 px-4" variants={ITEM_VARIANTS}>
               <LLButton
                 text="Senaste Nytt"
                 effect="letterSwap"
                 wiggle
-                className="font-baskerVilleOld text-5xl w-min justify-between tracking-wider"
+                className="font-baskerVilleOld text-4xl w-min justify-between tracking-widest"
               />
             </motion.li>
 
-            <motion.li className="w-full px-4" variants={ITEM_VARIANTS}>
+            <motion.li className=" w-full px-4" variants={ITEM_VARIANTS}>
               <LLButton
                 text="(Prenumerera)"
                 effect="stretch"
                 stretch={2}
                 gap="2em"
-                className="font-baskerVilleOld text-3xl w-min justify-center py-4 "
+                className="font-baskerVilleOld text-2xl w-min justify-center py-4 "
               />
             </motion.li>
 
-            <motion.li className="w-full px-4" variants={ITEM_VARIANTS}>
+            <motion.li className="hidden w-full px-4" variants={ITEM_VARIANTS}>
               <LLButton
                 text="Om oss"
-                effect="justify"
-                className="font-baskervilleClassic text-4xl uppercase w-min "
+                effect="default"
+                className="font-baskervilleClassic text-2xl uppercase w-min "
               />
             </motion.li>
 
-            <motion.li className="w-full px-4" variants={ITEM_VARIANTS}>
+            <motion.li className="hidden w-full px-4" variants={ITEM_VARIANTS}>
               <LLButton
                 text="TIDSKRIFTEN"
                 mono
-                className="font-baskervilleClassic text-4xl uppercase w-min py-4 justify-center"
+                className="font-baskervilleClassic text-2xl uppercase w-min py-4 justify-center"
               />
-            </motion.li>
+            </motion.li> */}
           </motion.ul>
         )}
       </AnimatePresence>
 
-      {/* MOBILE CART BUTTON */}
+      {/* CART BUTTON — fixed bottom-right on mobile, fixed top-right on desktop */}
       <motion.button
         key={totalItems}
-        className="lg:hidden fixed bottom-6 right-6 z-60 font-baskerVilleOld text-4xl inline-flex items-baseline px-4 py-3 hover:opacity-50 transition-opacity"
+        className="fixed bottom-6 right-6 lg:bottom-auto lg:top-0 lg:right-0 z-60 font-baskerVilleOld text-4xl inline-flex items-baseline px-4 py-3 lg:h-16 hover:opacity-50 transition-opacity"
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}

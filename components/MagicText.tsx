@@ -10,16 +10,22 @@ export interface MagicTextProps {
   text: string;
   indent?: boolean;
   illustrations?: { src: string; alt?: string }[];
+  animated?: boolean;
 }
 
 interface WordProps {
   children: string;
   progress: any;
   range: number[];
+  animated: boolean;
 }
 
-const Word: React.FC<WordProps> = ({ children, progress, range }) => {
+const Word: React.FC<WordProps> = ({ children, progress, range, animated }) => {
   const opacity = useTransform(progress, range, [0, 1]);
+
+  if (!animated) {
+    return <span className="inline-block mr-[0.3em]">{children}</span>;
+  }
 
   return (
     <span className="relative inline-block mr-[0.3em]">
@@ -96,6 +102,7 @@ export const MagicText: React.FC<MagicTextProps> = ({
   text,
   indent,
   illustrations,
+  animated = true,
 }) => {
   const container = useRef(null);
   const scrollContainer = useScrollContainer();
@@ -140,7 +147,7 @@ export const MagicText: React.FC<MagicTextProps> = ({
         const end = start + spread;
 
         return (
-          <Word key={i} progress={scrollYProgress} range={[start, end]}>
+          <Word key={i} progress={scrollYProgress} range={[start, end]} animated={animated}>
             {item.word}
           </Word>
         );
