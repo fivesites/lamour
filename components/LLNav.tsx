@@ -10,6 +10,7 @@ import { useArticles } from "@/lib/contexts/ArticlesContext";
 import { useCart } from "@/lib/contexts/CartContext";
 import Stretch from "./Stretch";
 import Link from "next/link";
+import { Button } from "./ui/button";
 
 /* ─── ARTICLE SUBMENU ─── */
 
@@ -22,8 +23,8 @@ function ArticleSubMenu({
   const [openSeries, setOpenSeries] = useState(false);
   return (
     <div className="flex flex-col items-start justify-start whitespace-normal w-full max-h-[60vh] overflow-y-auto">
-      <div className="flex flex-col pt-2  items-start justify-start w-full">
-        <span className="flex items-start justiify-start text-left whitespace-normal w-full border-b border-b-foreground py-2 mb-2 px-8">
+      <div className="flex flex-col   items-start justify-start w-full">
+        <span className="flex items-center justify-start text-left whitespace-normal w-full border-b border-b-foreground h-12 px-8">
           <button
             className="font-baskervilleSC text-2xl w-full justify-start whitespace-normal flex flex-wrap items-start text-left"
             onClick={() => setOpenSeries(true)}
@@ -44,39 +45,62 @@ function ArticleSubMenu({
             ))}
           </div>
         )}
+        <div className="flex justify-end  bg-transparent hover:bg-foreground w-full  ">
+          <LLButton
+            text="Läs alla"
+            className="font-baskerVilleOld text-4xl w-min rounded-none px-8 h-16 bg-transparent text-foreground hover:bg-foreground hover:text-background"
+          />
+        </div>
       </div>
     </div>
   );
 }
 
-function ShopSubMenu() {
+function ShopSubMenu({ setNavOpen }: { setNavOpen: (v: boolean) => void }) {
   const issues = useIssues();
-  const { setDrawerOpen } = useCart();
+  const { addToCart, setDrawerOpen } = useCart();
   return (
-    <div className="flex flex-col items-start justify-start whitespace-normal w-full max-h-[60vh] overflow-y-auto ">
+    <div className="flex flex-col items-start justify-start whitespace-normal w-full max-h-[60vh] overflow-y-auto">
       <div className="flex flex-col w-full">
         {issues.map((issue) => (
           <div
             key={issue._id}
-            className="relative flex items-center w-full border-b border-b-foreground px-8  py-2"
+            className="relative flex items-center w-full border-b border-b-foreground justify-between h-12 pl-8 pr-8 lg:pr-6"
           >
             <Link
-              className=" font-baskervilleSC text-2xl tracking-wider gap-x-4 flex "
+              className=" font-baskervilleSC text-2xl tracking-wider gap-x-4 flex  justify-start "
               href={`/shop/${issue.slug.current}`}
               key={issue._id}
+              onClick={() => setNavOpen(false)}
             >
               <span className="lowercase">LL{issue.issueNumber}</span>
               {issue.title}
             </Link>
 
             <button
-              onClick={() => setDrawerOpen(true)}
-              className="absolute right-6 text-3xl font-baskervilleSC"
+              onClick={() => {
+                addToCart({
+                  id: issue._id,
+                  title: issue.title,
+                  price: issue.price != null ? String(issue.price) : "0",
+                });
+              }}
+              className=" text-3xl font-baskervilleSC"
             >
               +
             </button>
           </div>
         ))}
+        <div className="flex justify-end  bg-transparent hover:bg-foreground ">
+          <LLButton
+            text="Till kassan"
+            className="font-baskerVilleOld text-4xl w-min rounded-none px-8 h-16 bg-transparent text-foreground hover:bg-foreground hover:text-background"
+            onClick={() => {
+              setDrawerOpen(true);
+              setNavOpen(false);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -87,93 +111,128 @@ const ITEM_VARIANTS = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
 } as const;
 
-/* ─── DESKTOP NAV ─── */
+/* ─── NAV OVERLAY (shared mobile + desktop) ─── */
 
-function DesktopNav({
+function NavOverlay({
   navOpen,
-  setNavOpen,
   openShopSubMenu,
   setOpenShopSubMenu,
   openArticleSubMenu,
   setOpenArticleSubMenu,
+  setNavOpen,
 }: {
   navOpen: boolean;
-  setNavOpen: (v: boolean) => void;
   openShopSubMenu: boolean;
   setOpenShopSubMenu: (v: boolean) => void;
   openArticleSubMenu: boolean;
   setOpenArticleSubMenu: (v: boolean) => void;
+  setNavOpen: (v: boolean) => void;
 }) {
-  const { articles } = useArticles();
-  const issues = useIssues();
-
   return (
     <AnimatePresence>
       {navOpen && (
-        <div className="hidden lg:flex justify-between w-full">
-          {/* NAV ROW */}
-          <motion.div
-            layout
-            className="flex flex-col items-baseline gap-x-8 gap-y-4 w-full py-4 px-4 "
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.08 } },
-            }}
+        <motion.ul
+          className="flex flex-col  w-full justify-start items-start font-baskerville mt-24 lg:mt-0 py-0 list-none gap-y-2"
+          initial="hidden"
+          animate="visible"
+          exit="hidden"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.1 } },
+          }}
+        >
+          <motion.li
+            className={`w-full lg:col-span-1 ${openShopSubMenu ? "" : ""}`}
+            variants={ITEM_VARIANTS}
           >
-            <motion.div variants={ITEM_VARIANTS}>
+            <span className="flex justify-between lg:justify-start lg:gap-x-6 w-full border-b border-b-foreground pl-6 pr-6 lg:pr-3 h-16">
               <LLButton
                 href="/shop"
-                text={`Shop / Alla nummer`}
-                className="font-baskerVilleOld text-3xl tracking-wider w-min"
+                text="Shop / Alla nummer"
+                className="font-baskerVilleOld text-4xl w-min"
+                onClick={() => {
+                  setOpenShopSubMenu(!openShopSubMenu);
+                  setOpenArticleSubMenu(false);
+                  setNavOpen(false);
+                }}
+              />
+              <LLButton
+                text="V"
+                className={`font-baskerVilleOld text-4xl w-min mr-2  ${
+                  openShopSubMenu ? "rotate-0" : "-rotate-90"
+                }`}
                 onClick={() => {
                   setOpenShopSubMenu(!openShopSubMenu);
                   setOpenArticleSubMenu(false);
                 }}
               />
-            </motion.div>
+            </span>
+            <AnimatePresence>
+              {openShopSubMenu && <ShopSubMenu setNavOpen={setNavOpen} />}
+            </AnimatePresence>
+          </motion.li>
 
-            <motion.div variants={ITEM_VARIANTS}>
+          <motion.li
+            className={`w-full lg:col-span-2  ${!openShopSubMenu ? "" : ""}`}
+            variants={ITEM_VARIANTS}
+          >
+            <span className="flex justify-between lg:justify-start w-full gap-x-8 border-b border-b-foreground pl-6 pr-6 lg:pr-3 h-16">
               <LLButton
                 href="/articles"
-                text={`Alla artiklar`}
-                className="font-baskerVilleOld text-3xl tracking-wider w-min"
+                text="Alla artiklar"
+                className="font-baskerVilleOld text-4xl w-min"
+                onClick={() => {
+                  setOpenArticleSubMenu(!openArticleSubMenu);
+                  setOpenShopSubMenu(false);
+                  setNavOpen(false);
+                }}
+              />
+              <LLButton
+                text="V"
+                className={`font-baskerVilleOld text-4xl w-min mr-2  ${
+                  openArticleSubMenu ? "rotate-0" : "-rotate-90"
+                }`}
                 onClick={() => {
                   setOpenArticleSubMenu(!openArticleSubMenu);
                   setOpenShopSubMenu(false);
                 }}
               />
-            </motion.div>
+            </span>
+            <AnimatePresence>
+              {openArticleSubMenu && <ArticleSubMenu setNavOpen={setNavOpen} />}
+            </AnimatePresence>
+          </motion.li>
 
-            <motion.div variants={ITEM_VARIANTS}>
-              <LLButton
-                text="Senaste Nytt"
-                effect="letterSwap"
-                className="font-baskerVilleOld text-3xl w-min tracking-wider"
-              />
-            </motion.div>
-
-            <motion.div variants={ITEM_VARIANTS}>
-              <LLButton
-                text="(Prenumerera)"
-                effect="stretch"
-                className="font-baskerVilleOld text-xl w-min"
-              />
-            </motion.div>
-
-            <motion.div variants={ITEM_VARIANTS}>
-              <LLButton
-                text="OM TIDSKRIFTEN"
-                mono
-                className="font-baskervilleClassic text-xl uppercase w-min"
-              />
-            </motion.div>
-          </motion.div>
-
-          {/* SUBMENUS */}
-        </div>
+          <motion.li
+            className="col-start-1 flex flex-col w-full px-3 pt-2 gap-y-2"
+            variants={ITEM_VARIANTS}
+          >
+            <LLButton
+              href="/"
+              text=" Om Oss"
+              className="font-baskerVilleOld text-4xl w-min h-12"
+              onClick={() => setNavOpen(false)}
+            />
+            <LLButton
+              href="/"
+              text=" Prenumerera"
+              className="font-baskerVilleOld text-4xl w-min h-12"
+              onClick={() => setNavOpen(false)}
+            />
+            <LLButton
+              href="/"
+              text=" Kontakt"
+              className="font-baskerVilleOld text-4xl w-min h-12"
+              onClick={() => setNavOpen(false)}
+            />
+            <LLButton
+              href="/"
+              text=" Nästa nummer, monsieur?"
+              className="font-baskerVilleOld text-4xl w-min h-12"
+              onClick={() => setNavOpen(false)}
+            />
+          </motion.li>
+        </motion.ul>
       )}
     </AnimatePresence>
   );
@@ -194,10 +253,10 @@ export default function LLNav() {
 
   return (
     <div
-      className={`fixed top-0 left-0 w-full flex flex-col items-center justify-start gap-0 pb-0 z-50 transition-colors   duration-500 ${navOpen ? "min-h-dvh bg-background lg:bg-transparent lg:min-h-auto" : "min-h-auto"}`}
+      className={`fixed top-0 left-0 w-full flex flex-col items-center  justify-start gap-0 pb-0 z-50 transition-colors duration-500 ${navOpen ? "min-h-dvh bg-[#FCC5F8] lg:min-h-auto" : "min-h-auto h-16 bg-transparent"}`}
     >
       {/* HEADER ROW */}
-      <div className="w-full flex justify-between items-baseline h-full lg:pr-16">
+      <div className="w-full flex justify-between items-baseline h-full lg:pr-16 ">
         <motion.div
           className={`flex items-baseline h-full font-baskerville pt-0 px-0 whitespace-nowrap ${navOpen ? "justify-between" : "justify-start"}`}
           initial={{ width: "min-content" }}
@@ -231,14 +290,14 @@ export default function LLNav() {
         </motion.div>
       </div>
 
-      {/* DESKTOP NAV */}
-      <DesktopNav
+      {/* NAV OVERLAY */}
+      <NavOverlay
         navOpen={navOpen}
-        setNavOpen={setNavOpen}
         openShopSubMenu={openShopSubMenu}
         setOpenShopSubMenu={setOpenShopSubMenu}
         openArticleSubMenu={openArticleSubMenu}
         setOpenArticleSubMenu={setOpenArticleSubMenu}
+        setNavOpen={setNavOpen}
       />
 
       <button className="fixed bottom-0 right-0 hidden lg:block">
@@ -250,105 +309,6 @@ export default function LLNav() {
           />
         </span>
       </button>
-
-      {/* MOBILE NAV */}
-      <AnimatePresence>
-        {navOpen && (
-          <motion.ul
-            className=" flex flex-col lg:hidden gap-y-2 w-full justify-start items-start font-baskerville py-4 list-none"
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: 0.12 } },
-            }}
-          >
-            <motion.li className="w-full" variants={ITEM_VARIANTS}>
-              <span className="flex justify-between w-full border-b border-b-foreground py-2 px-4">
-                <div className="flex gap-x-0">
-                  <LLButton
-                    href="/shop"
-                    text={`Shop / Alla nummer`}
-                    className="font-baskerVilleOld text-4xl w-min"
-                    onClick={() => setOpenShopSubMenu(!openShopSubMenu)}
-                  />
-                </div>
-                <LLButton
-                  text="V"
-                  className={`font-baskerVilleOld text-4xl w-min mr-2 ${
-                    openShopSubMenu ? "rotate-0" : "-rotate-90"
-                  }`}
-                  onClick={() => setOpenShopSubMenu(!openShopSubMenu)}
-                />
-              </span>
-              <AnimatePresence>
-                {openShopSubMenu && <ShopSubMenu />}
-              </AnimatePresence>
-            </motion.li>
-
-            <motion.li className="w-full" variants={ITEM_VARIANTS}>
-              <span className="flex justify-between w-full border-b border-b-foreground py-2 px-4 ">
-                <div className="flex gap-x-0">
-                  <LLButton
-                    href="/articles"
-                    text={`Alla artiklar`}
-                    className="font-baskerVilleOld text-4xl w-min"
-                    onClick={() => setOpenArticleSubMenu(!openArticleSubMenu)}
-                  />
-                </div>
-                <LLButton
-                  text="V"
-                  className={`font-baskerVilleOld text-4xl w-min mr-2 ${
-                    openArticleSubMenu ? "rotate-0" : "-rotate-90"
-                  }`}
-                  onClick={() => setOpenArticleSubMenu(!openArticleSubMenu)}
-                />
-              </span>
-              <AnimatePresence>
-                {openArticleSubMenu && (
-                  <ArticleSubMenu setNavOpen={setNavOpen} />
-                )}
-              </AnimatePresence>
-            </motion.li>
-
-            {/* <motion.li className=" w-full pt-4 px-4" variants={ITEM_VARIANTS}>
-              <LLButton
-                text="Senaste Nytt"
-                effect="letterSwap"
-                wiggle
-                className="font-baskerVilleOld text-4xl w-min justify-between tracking-widest"
-              />
-            </motion.li>
-
-            <motion.li className=" w-full px-4" variants={ITEM_VARIANTS}>
-              <LLButton
-                text="(Prenumerera)"
-                effect="stretch"
-                stretch={2}
-                gap="2em"
-                className="font-baskerVilleOld text-2xl w-min justify-center py-4 "
-              />
-            </motion.li>
-
-            <motion.li className="hidden w-full px-4" variants={ITEM_VARIANTS}>
-              <LLButton
-                text="Om oss"
-                effect="default"
-                className="font-baskervilleClassic text-2xl uppercase w-min "
-              />
-            </motion.li>
-
-            <motion.li className="hidden w-full px-4" variants={ITEM_VARIANTS}>
-              <LLButton
-                text="TIDSKRIFTEN"
-                mono
-                className="font-baskervilleClassic text-2xl uppercase w-min py-4 justify-center"
-              />
-            </motion.li> */}
-          </motion.ul>
-        )}
-      </AnimatePresence>
 
       {/* CART BUTTON — fixed bottom-right on mobile, fixed top-right on desktop */}
       <motion.button

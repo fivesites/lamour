@@ -14,7 +14,8 @@ export const issuesQuery = groq`*[_type == "issue"] | order(issueNumber desc) {
   coverImage,
   price,
   inStock,
-  publishedAt
+  publishedAt,
+  dimensions
 }`;
 
 export const issueBySlugQuery = groq`*[_type == "issue" && slug.current == $slug][0] {
@@ -28,7 +29,8 @@ export const issueBySlugQuery = groq`*[_type == "issue" && slug.current == $slug
   price,
   stripePriceId,
   inStock,
-  publishedAt
+  publishedAt,
+  dimensions
 }`;
 
 export const seriesQuery = groq`*[_type == "series"] | order(title asc) {

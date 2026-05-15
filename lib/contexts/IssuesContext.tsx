@@ -11,6 +11,10 @@ export type Issue = {
   price?: number;
   inStock?: boolean;
   publishedAt?: string;
+  dimensions?: {
+    cover?: { width: number; height: number };
+    spine?: { width: number };
+  };
 };
 
 const IssuesContext = createContext<Issue[]>([]);

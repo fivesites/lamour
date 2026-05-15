@@ -93,5 +93,30 @@ export default defineType({
       title: "Published At",
       type: "date",
     }),
+    defineField({
+      name: "dimensions",
+      title: "Dimensions",
+      type: "object",
+      description: "Physical dimensions in millimeters",
+      fields: [
+        defineField({
+          name: "cover",
+          title: "Cover",
+          type: "object",
+          fields: [
+            defineField({ name: "width", title: "Width (mm)", type: "number" }),
+            defineField({ name: "height", title: "Height (mm)", type: "number" }),
+          ],
+        }),
+        defineField({
+          name: "spine",
+          title: "Spine",
+          type: "object",
+          fields: [
+            defineField({ name: "width", title: "Width (mm)", type: "number" }),
+          ],
+        }),
+      ],
+    }),
   ],
 });

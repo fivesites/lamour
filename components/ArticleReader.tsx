@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { motion } from "framer-motion";
 import { MagicText } from "@/components/MagicText";
 import { ScrollContainerContext } from "@/lib/ScrollContainerContext";
@@ -45,19 +45,6 @@ export default function ArticleReader({
   publishedAt,
 }: ArticleReaderProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [cols, setCols] = useState<1 | 2 | 3>(2);
-  const [isDesktop, setIsDesktop] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)");
-    setIsDesktop(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  const activeCols = isDesktop ? cols : 1;
-  const isPaged = activeCols > 1;
 
   return (
     <motion.div
@@ -117,38 +104,13 @@ export default function ArticleReader({
               )}
             </div>
 
-            <div className="hidden lg:flex items-center gap-1 mb-6">
-              {([1, 2, 3] as const).map((n) => (
-                <button
-                  key={n}
-                  onClick={() => setCols(n)}
-                  className={`font-mono text-xs tracking-widest px-3 py-1 border transition-colors ${
-                    cols === n
-                      ? "border-foreground bg-foreground text-background"
-                      : "border-foreground/20 text-foreground/40 hover:border-foreground/60 hover:text-foreground/60"
-                  }`}
-                >
-                  {n}
-                </button>
-              ))}
-            </div>
-
-            <div
-              style={{
-                columnCount: activeCols,
-                columnFill: "auto",
-                columnGap: isPaged ? "2rem" : undefined,
-                height: isPaged ? "100dvh" : "auto",
-                overflowX: isPaged ? "auto" : undefined,
-                overflowY: isPaged ? "hidden" : undefined,
-              }}
-            >
+            <div>
               {plainText ? (
                 <MagicText
                   text={plainText}
                   indent
                   illustrations={illustrations}
-                  animated={!isPaged}
+                  animated
                 />
               ) : body ? (
                 <SanityPortableText value={body} />
