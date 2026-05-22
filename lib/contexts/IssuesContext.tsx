@@ -15,6 +15,8 @@ export type Issue = {
     cover?: { width: number; height: number };
     spine?: { width: number };
   };
+  description?: any[];
+  previewImages?: Array<{ _key: string; asset: any; alt?: string }>;
 };
 
 const IssuesContext = createContext<Issue[]>([]);

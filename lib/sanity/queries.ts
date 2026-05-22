@@ -15,7 +15,9 @@ export const issuesQuery = groq`*[_type == "issue"] | order(issueNumber desc) {
   price,
   inStock,
   publishedAt,
-  dimensions
+  dimensions,
+  description,
+  "previewImages": previewImages[] { _key, alt, asset }
 }`;
 
 export const issueBySlugQuery = groq`*[_type == "issue" && slug.current == $slug][0] {

@@ -3,24 +3,17 @@ import { PortableText, PortableTextComponents } from "@portabletext/react";
 const components: PortableTextComponents = {
   block: {
     normal: ({ children }) => (
-      <p className="font-baskerVV text-[19.3px] leading-7 tracking-[0.03em] mb-4">
+      <p className="font-baskerVV text-xl text-center mb-4">{children}</p>
+    ),
+    h1: ({ children }) => (
+      <h1 className="font-baskerVilleOld text-2xl tracking-wider  mb-4 mt-8 text-center">
         {children}
-      </p>
+      </h1>
     ),
     h2: ({ children }) => (
-      <h2 className="font-baskerVilleOld text-2xl tracking-widest uppercase  mb-3 mt-6">
+      <h2 className="font-baskerVilleOld text-2xl tracking-widest text-center  mb-3 mt-6">
         {children}
       </h2>
-    ),
-    h3: ({ children }) => (
-      <h3 className="font-baskerVilleOld text-xl italic tracking-wide mb-3  mt-4">
-        {children}
-      </h3>
-    ),
-    blockquote: ({ children }) => (
-      <blockquote className="border-l border-foreground pl-6 my-6 font-baskerVilleOld italic text-xl tracking-wide">
-        {children}
-      </blockquote>
     ),
   },
   marks: {

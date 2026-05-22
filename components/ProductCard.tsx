@@ -8,7 +8,7 @@ import Stretch from "./Stretch";
 import LLButton from "./LLButton";
 import { useCart } from "@/lib/contexts/CartContext";
 
-function PriceButton({ price }: { price: string }) {
+export function PriceButton({ price }: { price: string }) {
   return (
     <Button
       size="linkSize"
