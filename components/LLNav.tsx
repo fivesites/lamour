@@ -81,7 +81,7 @@ function IssueRow({
           addToCart({
             id: issue._id,
             title: issue.title,
-            price: issue.price != null ? String(issue.price) : "0",
+            price: issue.price != null ? `${issue.price} kr` : "0",
           });
         }}
       >

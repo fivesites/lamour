@@ -7,8 +7,11 @@ export type Issue = {
   title: string;
   slug: { current: string };
   issueNumber: number;
-  coverImage?: { asset: { _ref: string }; alt?: string };
+  cover?: { asset: { _ref: string }; alt?: string };
+  spine?: { asset: { _ref: string }; alt?: string };
+  back?: { asset: { _ref: string }; alt?: string };
   price?: number;
+  weight?: number;
   inStock?: boolean;
   publishedAt?: string;
   dimensions?: {

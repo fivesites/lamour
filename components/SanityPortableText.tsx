@@ -15,6 +15,16 @@ const components: PortableTextComponents = {
         {children}
       </h2>
     ),
+    blockquote: ({ children }) => (
+      <blockquote className="font-baskerVV text-xl italic border-l-2 border-foreground pl-6 my-6 text-foreground/80">
+        {children}
+      </blockquote>
+    ),
+    quote: ({ children }) => (
+      <blockquote className="font-baskerVilleOld text-2xl text-center italic my-8 px-8 text-foreground/90">
+        {children}
+      </blockquote>
+    ),
   },
   marks: {
     em: ({ children }) => <em className="italic">{children}</em>,

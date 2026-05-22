@@ -10,8 +10,8 @@ export default function HomeHero() {
 
   if (!latest) return null;
 
-  const imageUrl = latest.coverImage?.asset
-    ? urlFor(latest.coverImage).width(1200).url()
+  const imageUrl = latest.cover?.asset
+    ? urlFor(latest.cover).width(1200).url()
     : undefined;
 
   return (
@@ -19,7 +19,7 @@ export default function HomeHero() {
       <ProductCard
         articleID={String(latest.issueNumber)}
         title={latest.title}
-        price={latest.price ? String(Math.round(latest.price / 100)) : "—"}
+        price={latest.price ? String(latest.price) : "—"}
         href={`/shop/${latest.slug.current}`}
         image={imageUrl}
         imageSize="h-[70vh]"

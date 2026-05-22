@@ -3,7 +3,7 @@ import { groq } from "next-sanity";
 export const latestIssueQuery = groq`*[_type == "issue"] | order(issueNumber desc)[0] {
   _id,
   title,
-  coverImage
+  cover
 }`;
 
 export const issuesQuery = groq`*[_type == "issue"] | order(issueNumber desc) {
@@ -11,8 +11,11 @@ export const issuesQuery = groq`*[_type == "issue"] | order(issueNumber desc) {
   title,
   slug,
   issueNumber,
-  coverImage,
+  cover,
+  spine,
+  back,
   price,
+  weight,
   inStock,
   publishedAt,
   dimensions,
@@ -25,10 +28,13 @@ export const issueBySlugQuery = groq`*[_type == "issue" && slug.current == $slug
   title,
   slug,
   issueNumber,
-  coverImage,
+  cover,
+  spine,
+  back,
   "previewImages": previewImages[] { _key, alt, asset },
   description,
   price,
+  weight,
   stripePriceId,
   inStock,
   publishedAt,

@@ -120,7 +120,7 @@ function IssueItem({
   onSelect: (issue: Issue) => void;
 }) {
   const dims = getDimensions(issue.dimensions);
-  const src = issue.coverImage?.asset ? urlFor(issue.coverImage).url() : null;
+  const src = issue.cover?.asset ? urlFor(issue.cover).url() : null;
   const href = `/shop/${issue.slug.current}`;
   const effectiveMode = featured ? "framsida" : mode;
 
@@ -185,7 +185,7 @@ function IssueItem({
         <Image
           src={src}
           fill
-          alt={issue.coverImage?.alt ?? issue.title}
+          alt={issue.cover?.alt ?? issue.title}
           className={`object-cover ${effectiveMode === "framsida" ? "object-right" : "object-left"}`}
         />
       ) : (

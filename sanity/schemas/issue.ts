@@ -32,8 +32,8 @@ export default defineType({
       validation: (r) => r.required(),
     }),
     defineField({
-      name: "coverImage",
-      title: "Cover Image",
+      name: "cover",
+      title: "Cover",
       type: "image",
       options: { hotspot: true },
       fields: [
@@ -42,6 +42,32 @@ export default defineType({
           title: "Alt Text",
           type: "string",
           validation: (r) => r.required(),
+        }),
+      ],
+    }),
+    defineField({
+      name: "spine",
+      title: "Spine",
+      type: "image",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt Text",
+          type: "string",
+        }),
+      ],
+    }),
+    defineField({
+      name: "back",
+      title: "Back",
+      type: "image",
+      options: { hotspot: true },
+      fields: [
+        defineField({
+          name: "alt",
+          title: "Alt Text",
+          type: "string",
         }),
       ],
     }),
@@ -75,6 +101,8 @@ export default defineType({
             { title: "Normal", value: "normal" },
             { title: "Heading 1", value: "h1" },
             { title: "Heading 2", value: "h2" },
+            { title: "Blockquote", value: "blockquote" },
+            { title: "Quote", value: "quote" },
           ],
           lists: [],
           marks: {
@@ -96,9 +124,14 @@ export default defineType({
     }),
     defineField({
       name: "price",
-      title: "Price (öre/cents)",
+      title: "Price (SEK)",
       type: "number",
-      description: "Store in minor currency unit, e.g. 22000 = 220 kr",
+      description: "Enter in SEK, e.g. 220. Multiply by 100 when sending to Stripe.",
+    }),
+    defineField({
+      name: "weight",
+      title: "Weight (grams)",
+      type: "number",
     }),
     defineField({
       name: "stripePriceId",

@@ -12,7 +12,7 @@ type Issue = {
   title: string;
   slug: { current: string };
   issueNumber: number;
-  coverImage?: { asset: any; alt?: string };
+  cover?: { asset: any; alt?: string };
   price?: number;
   inStock?: boolean;
 };
@@ -40,12 +40,10 @@ export default async function ShopPage() {
                 articleID={String(issue.issueNumber)}
                 title={issue.title}
                 href={`/shop/${issue.slug.current}`}
-                price={
-                  issue.price ? String(Math.round(issue.price / 100)) : "—"
-                }
+                price={issue.price ? String(issue.price) : "—"}
                 image={
-                  issue.coverImage?.asset
-                    ? urlFor(issue.coverImage).width(600).url()
+                  issue.cover?.asset
+                    ? urlFor(issue.cover).width(600).url()
                     : undefined
                 }
                 imageSize="h-96"

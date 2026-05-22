@@ -99,7 +99,7 @@ export default function IssueCard({
 
   const images: ImageItem[] = issue
     ? [
-        ...(issue.coverImage?.asset ? [issue.coverImage as ImageItem] : []),
+        ...(issue.cover?.asset ? [issue.cover as ImageItem] : []),
         ...(issue.previewImages?.filter((img) => img.asset) ?? []),
       ]
     : [];
@@ -109,7 +109,7 @@ export default function IssueCard({
     addToCart({
       id: issue._id,
       title: issue.title,
-      price: issue.price != null ? String(issue.price) : "0",
+      price: issue.price != null ? `${issue.price} kr` : "0",
     });
     setDrawerOpen(true);
     onClose();
@@ -281,7 +281,7 @@ export default function IssueCard({
                           </span>
                           {issue.price != null && (
                             <span className="font-baskervilleSC lowercase text-lg lg:text-xl tracking-widest">
-                              {Math.round(issue.price / 100)} kr
+                              {issue.price} kr
                             </span>
                           )}
                         </div>
