@@ -294,7 +294,7 @@ function ArticleSpine({
   const horizontalBar = (
     <Link
       href={href}
-      className="relative w-full shrink-0 flex items-center justify-between px-6 h-14 overflow-hidden opacity-80 hover:opacity-100 transition-opacity duration-300 border-b border-foreground/20"
+      className="relative w-full shrink-0  bg-background flex items-center justify-between px-6 h-14 overflow-hidden opacity-80 hover:opacity-100 transition-opacity duration-300 border-b border-foreground/20"
     >
       {src ? (
         <Image
@@ -303,9 +303,8 @@ function ArticleSpine({
           alt=""
           className="object-cover blur-md scale-150"
         />
-      ) : (
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 h-10 aspect-17/24 bg-foreground/20" />
-      )}
+      ) : null}
+
       <span className="relative z-10 mix-blend-difference font-baskervilleSC text-background text-xl tracking-widest lowercase min-w-0 truncate">
         {article.title}
       </span>
