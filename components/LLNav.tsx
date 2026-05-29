@@ -9,11 +9,9 @@ import LLButton from "./LLButton";
 import { useIssues, type Issue } from "@/lib/contexts/IssuesContext";
 import { useArticles, type Article } from "@/lib/contexts/ArticlesContext";
 import { useCart } from "@/lib/contexts/CartContext";
-import Stretch from "./Stretch";
+
 import Link from "next/link";
 import { Button } from "./ui/button";
-
-const SHELF_MODES = ["fram", "rygg", "bak"] as const;
 
 /* ─── ROW COMPONENTS ─── */
 
