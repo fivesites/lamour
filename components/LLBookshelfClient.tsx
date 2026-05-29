@@ -63,7 +63,7 @@ export function BookshelfButton({
   horizontal?: boolean;
 }) {
   const barClass =
-    "w-[75vw] flex mx-auto lg:mx-0 justify-center items-center font-baskervilleSC text-lg h-12 tracking-widest hover:opacity-60 lowercase text-foreground transition-opacity border-b border-foreground/20 bg-background";
+    "w-full flex mx-auto lg:mx-0 justify-center items-center font-baskervilleSC text-lg h-12 tracking-widest hover:opacity-60 lowercase text-foreground transition-opacity border-b border-foreground/20 bg-background";
   const mobileClass = `lg:hidden ${barClass}`;
   const desktopClass =
     "hidden lg:flex flex-col shrink-0 w-14  h-dvh max-h-[45dvh] items-center pt-8 justify-start pl-1 font-baskervilleSC tracking-widest text-xl lowercase text-foreground hover:opacity-80 transition-opacity bg-background";
@@ -207,7 +207,7 @@ function IssueFront({
     <Link
       href={href}
       onClick={handleClick}
-      className={`relative overflow-hidden hover:opacity-90 transition-opacity duration-300 h-auto shadow lg:max-h-full flex items-end ${className}`}
+      className={`relative overflow-hidden hover:opacity-90 transition-opacity duration-300 min-h-[50dvh] h-auto shadow lg:max-h-full flex items-end ${className}`}
       style={{ aspectRatio: dims.coverAspectRatio }}
     >
       {src ? (
@@ -218,7 +218,7 @@ function IssueFront({
           className="object-cover object-right"
         />
       ) : (
-        <div className="h-[25dvh] lg:h-[50dvh] aspect-17/24 bg-foreground/20 flex flex-col justify-end items-start p-4">
+        <div className=" h-full lg:h-[50dvh] aspect-17/24 bg-foreground/20 flex flex-col justify-end items-start p-4">
           <span className="font-baskervilleSC text-foreground lowercase text-sm tracking-widest leading-tight">
             {issue.title}
           </span>
@@ -248,7 +248,7 @@ function ArticleFront({
   return (
     <Link
       href={href}
-      className={`relative shadow overflow-hidden hover:opacity-80 transition-opacity duration-300  h-auto flex items-center ${className}`}
+      className={`relative shadow overflow-hidden hover:opacity-80 transition-opacity duration-300  h-[50dvh] flex items-center ${className}`}
       style={{ aspectRatio: DEFAULT_DIMS.coverAspectRatio }}
     >
       {src ? (
@@ -256,10 +256,10 @@ function ArticleFront({
           src={src}
           fill
           alt={article.coverImage?.alt ?? article.title}
-          className="object-cover h-[25dvh] lg:h-[50dvh] aspect-17/24"
+          className="object-cover h-full lg:h-[50dvh] aspect-17/24"
         />
       ) : (
-        <div className="h-[25dvh] lg:h-[50dvh] aspect-17/24 bg-foreground/10 flex flex-col justify-end items-end p-4">
+        <div className="h-full lg:h-[50dvh] aspect-17/24 bg-foreground/10 flex flex-col justify-center items-center p-6">
           <span className="font-baskervilleSC  text-foreground lowercase text-sm tracking-widest leading-tight">
             {article.title}
           </span>
@@ -534,7 +534,7 @@ function HomeShelf() {
       ) : (
         <div
           ref={containerRef}
-          className="flex flex-col items-center justify-end w-full px-6 mt-0 lg:ml-14 bg-neutral-300 min-h-dvh pb-0 lg:flex-row lg:items-end lg:justify-start lg:h-dvh lg:overflow-x-auto"
+          className="flex flex-col items-center justify-end w-full px-0 mt-0 lg:ml-14 bg-neutral-300 min-h-dvh pb-0 lg:flex-row lg:items-end lg:justify-start lg:h-dvh lg:overflow-x-auto"
         >
           {latestIssue && (
             <IssueFront
