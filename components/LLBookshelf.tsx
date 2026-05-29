@@ -1,5 +1,5 @@
-import LLBookshelfClient from "./LLBookshelfClient";
+import LLBookshelfClient, { type BookshelfVariant } from "./LLBookshelfClient";
 
-export default async function LLBookshelf() {
-  return <LLBookshelfClient />;
+export default function LLBookshelf({ variant = "home" }: { variant?: BookshelfVariant }) {
+  return <LLBookshelfClient variant={variant} />;
 }

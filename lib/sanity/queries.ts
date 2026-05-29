@@ -49,7 +49,7 @@ export const seriesQuery = groq`*[_type == "series"] | order(title asc) {
   aboutText
 }`;
 
-export const articlesQuery = groq`*[_type == "article"] | order(publishedAt desc) {
+export const articlesQuery = groq`*[_type == "article"] | order(coalesce(publishedAt, _createdAt) desc) {
   _id,
   title,
   slug,

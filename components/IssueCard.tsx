@@ -7,7 +7,7 @@ import { urlFor } from "@/lib/sanity/image";
 import { useCart } from "@/lib/contexts/CartContext";
 import { type Issue } from "@/lib/contexts/IssuesContext";
 import SanityPortableText from "@/components/SanityPortableText";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 
 type ImageItem = { asset: any; alt?: string; _key?: string };
@@ -96,6 +96,15 @@ export default function IssueCard({
   const { addToCart, setDrawerOpen } = useCart();
   const [openShopInfo, setOpenShopInfo] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   const images: ImageItem[] = issue
     ? [
@@ -144,10 +153,10 @@ export default function IssueCard({
 
           {/* Panel */}
           <motion.div
-            className="fixed inset-0 lg:inset-auto lg:right-0 lg:top-0 lg:bottom-0 w-full lg:w-[calc(100vw-3.5rem)] z-80 bg-background flex overflow-y-auto"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
+            className="fixed top-14 inset-x-0 bottom-0 lg:inset-auto lg:right-0 lg:top-0 lg:bottom-0 w-full lg:w-[calc(100vw-3.5rem)] z-80 bg-background flex overflow-y-auto"
+            initial={isDesktop ? { x: "100%" } : { y: "100%" }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
+            exit={isDesktop ? { x: "100%" } : { y: "100%" }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
           >
             {/* Desktop vertical sidebar */}
@@ -164,7 +173,15 @@ export default function IssueCard({
 
             <div className="flex flex-col flex-1 min-w-0">
               {/* Header */}
-              <div className="flex items-center   shrink-0 w-full">
+              <div className="flex lg:hidden items-center   shrink-0 w-full">
+                <span
+                  className="w-full h-14 lg:h-20 pb-1 tracking-widest lowercase text-lg lg:text-xl flex items-center justify-center font-baskervilleSC "
+                  onClick={onClose}
+                >
+                  {issue.title} / Stäng (x)
+                </span>
+              </div>
+              <div className="hidden lg:flex items-center   shrink-0 w-full">
                 <span className="w-1/2 h-14 lg:h-20 pb-1 tracking-widest lowercase text-lg lg:text-xl flex items-center justify-center font-baskervilleSC ">
                   {issue.title}
                 </span>
@@ -182,7 +199,7 @@ export default function IssueCard({
 
               {/* ── MOBILE: stacked ── */}
               <div className="lg:hidden flex flex-col w-full">
-                <div className="h-[50dvh] flex flex-row overflow-x-auto snap-x snap-mandatory shrink-0">
+                <div className="h-[33.3dvh] flex flex-row overflow-x-auto snap-x snap-mandatory shrink-0">
                   {images.length > 0 ? (
                     images.map((img, i) => (
                       <div
@@ -202,7 +219,7 @@ export default function IssueCard({
                     <div className="w-full h-full bg-foreground/10 shrink-0" />
                   )}
                 </div>
-                <div className=" flex flex-col items-center justify-center gap-6 px-6 pt-8 pb-14">
+                <div className=" flex flex-col items-center justify-center gap-6 px-6 pt-8 pb-36">
                   <h2 className="font-baskervilleSC text-2xl tracking-widest lowercasen text-center leading-tight">
                     {issue.title}
                   </h2>
@@ -255,7 +272,7 @@ export default function IssueCard({
               </div>
 
               {/* ── BOTTOM BAR (shared) ── */}
-              <div className="fixed bottom-0 right-0 flex items-center bg-background  w-full lg:w-[calc(100vw-7.5rem)] z-80">
+              <div className="fixed bottom-0 right-0 flex items-center bg-background w-full lg:w-[calc(100vw-7.5rem)] z-80">
                 <div className="w-1/2 h-full hidden lg:flex">
                   <Button
                     variant="ghost"
@@ -265,7 +282,27 @@ export default function IssueCard({
                     See all images
                   </Button>
                 </div>
-                <div className="relative w-full lg:w-1/2">
+                <div className="flex lg:hidden flex-col bg-background w-full gap-4 px-4 pt-4 pb-6 shadow-md">
+                  <div className="flex w-full justify-between items-center">
+                    <span className="font-baskervilleSC lowercase text-lg tracking-widest">
+                      {issue.title}
+                    </span>
+                    {issue.price != null && (
+                      <span className="font-baskervilleSC lowercase text-lg tracking-widest">
+                        {issue.price} kr
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    disabled={issue.inStock === false}
+                    className="disabled:opacity-30 shadow-none bg-neutral-300 disabled:cursor-not-allowed w-full"
+                    onClick={handleAddToCart}
+                  >
+                    {issue.inStock === false ? "slutsåld" : "Lägg i korg"}
+                  </Button>
+                </div>
+                <div className="relative w-full hidden lg:block lg:w-1/2">
                   <AnimatePresence>
                     {openShopInfo && (
                       <motion.div
@@ -291,7 +328,7 @@ export default function IssueCard({
                   <Button
                     variant="ghost"
                     disabled={issue.inStock === false}
-                    className="disabled:opacity-30 shadow-md disabled:cursor-not-allowed w-full "
+                    className="disabled:opacity-30 shadow-md bg-secondary disabled:cursor-not-allowed w-full "
                     onClick={() => {
                       if (openShopInfo) {
                         handleAddToCart();

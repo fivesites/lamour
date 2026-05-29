@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { useBookshelfSettings } from "@/lib/contexts/BookshelfSettingsContext";
 
 import { motion, AnimatePresence } from "motion/react";
 import LLButton from "./LLButton";
@@ -10,6 +11,9 @@ import { useArticles, type Article } from "@/lib/contexts/ArticlesContext";
 import { useCart } from "@/lib/contexts/CartContext";
 import Stretch from "./Stretch";
 import Link from "next/link";
+import { Button } from "./ui/button";
+
+const SHELF_MODES = ["fram", "rygg", "bak"] as const;
 
 /* ─── ROW COMPONENTS ─── */
 
@@ -26,7 +30,7 @@ function ArticleRow({
       className={`relative flex items-center w-full border-b border-b-foreground min-h-12 py-2 pl-12 pr-12 ${expanded ? "" : "justify-center lg:justify-start"}`}
     >
       <Link
-        className="font-baskervilleSC text-2xl tracking-widest lowercase flex justify-start max-w-sm"
+        className="font-baskervilleSC text-2xl tracking-widest lowercase flex justify-center text-center  max-w-sm"
         href={`/articles/${article.slug.current}`}
         onClick={() => setNavOpen(false)}
       >
@@ -37,12 +41,6 @@ function ArticleRow({
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className="shrink-0 min-w-0"
       />
-      <button
-        className="font-baskervilleSC lowercase text-2xl -rotate-90 shrink-0"
-        onClick={() => setExpanded((v) => !v)}
-      >
-        V
-      </button>
     </div>
   );
 }
@@ -74,19 +72,6 @@ function IssueRow({
         transition={{ duration: 0.3, ease: "easeInOut" }}
         className="shrink-0 min-w-0"
       />
-      <button
-        className="font-baskervilleSC lowercase text-2xl -rotate-90 shrink-0"
-        onClick={() => {
-          setExpanded((v) => !v);
-          addToCart({
-            id: issue._id,
-            title: issue.title,
-            price: issue.price != null ? `${issue.price} kr` : "0",
-          });
-        }}
-      >
-        V
-      </button>
     </div>
   );
 }
@@ -109,23 +94,23 @@ function ArticleSubMenu({
             setNavOpen={setNavOpen}
           />
         ))}
-        <div className="flex justify-end bg-transparent hover:bg-foreground pl-16 pr-16 border-b border-b-foreground">
-          <button
-            className="font-baskerVilleOld w-full rounded-none px-4 py-4 bg-transparent text-foreground hover:bg-foreground hover:text-background"
-            onClick={() => setNavOpen(false)}
-          >
-            <div className="flex w-full items-baseline justify-between">
-              {"läs alla".split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="inline-block leading-none font-baskervilleSC transition-transform duration-300 hover:rotate-12 lowercase text-2xl"
-                >
-                  {char === " " ? " " : char}
-                </span>
-              ))}
-            </div>
-          </button>
-        </div>
+
+        <Button
+          variant="ghost"
+          className="px-12 pb-1 border-b border-b-foreground"
+          onClick={() => setNavOpen(false)}
+        >
+          <div className="flex w-full items-baseline justify-between">
+            {"läs alla".split("").map((char, i) => (
+              <span
+                key={i}
+                className="inline-block leading-none font-baskervilleSC transition-transform duration-300 hover:rotate-12 lowercase text-2xl"
+              >
+                {char === " " ? " " : char}
+              </span>
+            ))}
+          </div>
+        </Button>
       </div>
     </div>
   );
@@ -145,26 +130,26 @@ function ShopSubMenu({ setNavOpen }: { setNavOpen: (v: boolean) => void }) {
             addToCart={addToCart}
           />
         ))}
-        <div className="flex justify-end bg-transparent hover:bg-foreground pb-2 pl-12 pr-12 border-b border-b-foreground">
-          <button
-            className="font-baskervilleSC  w-full rounded-none px-4 py-4 bg-transparent text-foreground hover:bg-foreground hover:text-background"
-            onClick={() => {
-              setDrawerOpen(true);
-              setNavOpen(false);
-            }}
-          >
-            <div className="flex w-full items-baseline justify-between ">
-              {"till kassan".split("").map((char, i) => (
-                <span
-                  key={i}
-                  className="inline-block leading-none font-baskervilleSC transition-transform duration-300 hover:rotate-12 lowercase text-2xl"
-                >
-                  {char === " " ? " " : char}
-                </span>
-              ))}
-            </div>
-          </button>
-        </div>
+
+        <Button
+          variant="ghost"
+          className="px-12 pb-1 border-b border-b-foreground"
+          onClick={() => {
+            setDrawerOpen(true);
+            setNavOpen(false);
+          }}
+        >
+          <div className="flex w-full items-baseline justify-between ">
+            {"till kassan".split("").map((char, i) => (
+              <span
+                key={i}
+                className="inline-block leading-none font-baskervilleSC transition-transform duration-300 hover:rotate-12 lowercase text-2xl"
+              >
+                {char === " " ? " " : char}
+              </span>
+            ))}
+          </div>
+        </Button>
       </div>
     </div>
   );
@@ -315,6 +300,14 @@ export default function LLNav() {
   const [navOpen, setNavOpen] = useState(false);
   const [openArticleSubMenu, setOpenArticleSubMenu] = useState(false);
   const [openShopSubMenu, setOpenShopSubMenu] = useState(false);
+  const {
+    mode,
+    setMode,
+    showIssues,
+    setShowIssues,
+    showArticles,
+    setShowArticles,
+  } = useBookshelfSettings();
   const { articles } = useArticles();
   const issues = useIssues();
   const { totalItems, setDrawerOpen } = useCart();
@@ -329,48 +322,53 @@ export default function LLNav() {
     >
       {/* ── MOBILE HEADER ── */}
       <div
-        className={`lg:hidden flex flex-col w-full shrink-0 cursor-pointer transition-[background-color,height] duration-200 overflow-hidden h-14 ${navOpen ? "bg-[#FCC5F8]" : "bg-background"}`}
-        onClick={() => setNavOpen((v) => !v)}
+        className={`lg:hidden flex items-center w-full shrink-0 h-14 px-4 transition-colors duration-200 ${navOpen ? "bg-[#FCC5F8]" : "bg-background"}`}
       >
+        {/* Hamburger */}
+        <button
+          onClick={() => setNavOpen((v) => !v)}
+          className={`w-10 h-10 flex items-center justify-center font-baskerVilleOld text-sm tracking-widest  ${navOpen ? "rotate-0 mt-2" : "rotate-90 mt-1.5"}  hover:opacity-60 transition-opacity shrink-0`}
+        >
+          {navOpen ? "X" : "II"}
+        </button>
+
         {/* Logo centered */}
-        <div className="flex items-center justify-center flex-1">
-          <div
-            className="flex items-center gap-3 font-baskerville"
-            onClick={(e) => e.stopPropagation()}
+        <div className="flex-1 flex items-center justify-center gap-3 font-baskerville">
+          <Link
+            href="/"
+            className="font-baskervilleSC text-xl tracking-widest hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
           >
-            <Link
-              href="/"
-              className="font-baskervilleSC text-2xl tracking-widest hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
-            >
-              L'Amour
-            </Link>
-            <div
-              className={`h-px mt-2 bg-foreground transition-[width] duration-200 ${navOpen ? "w-16" : "w-8"}`}
-            />
-            <Link
-              href="/"
-              className="font-baskervilleSC text-2xl tracking-widest hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
-            >
-              La Mort
-            </Link>
-          </div>
+            L'Amour
+          </Link>
+          <div
+            className={`h-px bg-foreground transition-[width] duration-200 ${navOpen ? "w-16" : "w-8"}`}
+          />
+          <Link
+            href="/"
+            className="font-baskervilleSC text-xl tracking-widest hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
+          >
+            La Mort
+          </Link>
         </div>
+
+        {/* Spacer matching cart button width */}
+        <div className="w-10 shrink-0" />
       </div>
 
       {/* ── DESKTOP SIDEBAR ── */}
       <div
-        className={`hidden lg:flex flex-col items-center w-14 lg:group-hover:w-16 transition-[width,background-color] duration-200 h-full shrink-0 cursor-pointer ${navOpen ? "bg-[#FCC5F8]" : "bg-background"}`}
+        className={`hidden lg:flex flex-col items-center w-14 lg:group-hover:w-16 transition-[width,background-color] duration-200 h-full shrink-0 cursor-pointer ${navOpen ? "bg-[#FCC5F8]" : "bg-neutral-300"}`}
         onClick={() => setNavOpen((v) => !v)}
       >
         <LLButton
           text={navOpen ? "X" : "II"}
           onClick={() => setNavOpen(!navOpen)}
-          className={` h-16 hidden  w-full items-center justify-center rounded-none p-4 text-4xl shrink-0 ${navOpen ? "rotate-0 " : "rotate-90 -ml-2"}`}
+          className={` h-16 hidden  w-full items-center justify-center rounded-none p-4 text-xl shrink-0 ${navOpen ? "rotate-0 " : "rotate-90 -ml-2"}`}
         />
         <div className="flex flex-col justify-start items-center flex-1 pt-8 gap-4 ">
           <Link
             href="/"
-            className="font-baskervilleSC text-2xl tracking-wider hover:opacity-60 lowercase  transition-opacity whitespace-nowrap"
+            className="font-baskervilleSC text-xl tracking-wider hover:opacity-60 lowercase  transition-opacity whitespace-nowrap"
             style={{ writingMode: "vertical-lr", transform: "rotate(0deg)" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -379,7 +377,7 @@ export default function LLNav() {
           <div className="w-px h-8 bg-foreground my-1 -ml-2" />
           <Link
             href="/"
-            className="font-baskervilleSC text-2xl tracking-wider hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
+            className="font-baskervilleSC text-xl tracking-wider hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
             style={{ writingMode: "vertical-rl", transform: "rotate(0deg)" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -389,7 +387,7 @@ export default function LLNav() {
       </div>
 
       {/* ── MOBILE NAV OVERLAY ── */}
-      <div className="lg:hidden">
+      <div className="lg:hidden flex flex-col flex-1">
         <NavOverlay
           navOpen={navOpen}
           openShopSubMenu={openShopSubMenu}
@@ -414,26 +412,21 @@ export default function LLNav() {
         </div>
       )}
 
-      <button className="fixed bottom-0 right-0 hidden">
-        <span className="inline-flex rounded-[50%] bg-foreground overflow-hidden self-stretch -rotate-12 mb-5">
-          <Stretch
-            text="Prenumerera"
-            className="tracking-widest text-background px-16 py-4 lg:py-4"
-            size="text-2xl"
-          />
-        </span>
-      </button>
-
       <motion.button
         key={totalItems}
-        className="fixed bottom-6 right-6 lg:bottom-auto lg:top-0 lg:right-4 z-60 font-baskerVilleOld text-4xl inline-flex items-baseline px-4 py-3 lg:h-16 hover:opacity-50 transition-opacity"
+        className="fixed top-0 right-0 z-60 font-baskerVilleOld h-14 inline-flex items-center px-4 lg:h-16 hover:opacity-50 transition-opacity"
         initial={{ opacity: 0, y: 4 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
         onClick={() => setDrawerOpen(true)}
         aria-label="Öppna korg"
       >
-        <Stretch text={`${totalItems}`} size="text-3xl" />
+        <span className="hidden lg:flex font-baskervilleSC text-lg lowercase">
+          I varukorgen ({totalItems})
+        </span>
+        <span className="flex lg:hidden font-baskervilleSC text-lg lowercase">
+          ({totalItems})
+        </span>
       </motion.button>
     </div>
   );

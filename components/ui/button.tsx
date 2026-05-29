@@ -18,14 +18,14 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost:
-          "text-foreground bg-background hover:bg-foreground  hover:text-background font-baskervilleSC  ",
+          "text-foreground bg-transparent hover:bg-foreground  hover:text-background font-baskervilleSC justify-start  ",
         link: "justify-start text-primary hover:text-primary/80    ",
       },
       size: {
         default:
           "h-14 lg:h-20 pb-1 tracking-widest has-[>svg]:px-3 lowercase text-lg lg:text-xl w-full",
         xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
+        sm: "h-10 pb-0.5 px-6  tracking-widest has-[>svg]:px-3 lowercase text-base  w-full",
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
         "icon-xs": "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",

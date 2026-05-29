@@ -9,6 +9,7 @@ import { issuesQuery, articlesQuery, seriesQuery } from "@/lib/sanity/queries";
 import { IssuesProvider } from "@/lib/contexts/IssuesContext";
 import { ArticlesProvider } from "@/lib/contexts/ArticlesContext";
 import { CartProvider } from "@/lib/contexts/CartContext";
+import { BookshelfSettingsProvider } from "@/lib/contexts/BookshelfSettingsContext";
 import type { Issue } from "@/lib/contexts/IssuesContext";
 import type { Article, Series } from "@/lib/contexts/ArticlesContext";
 
@@ -70,12 +71,14 @@ export default async function RootLayout({
         className={`${baskerville.variable} ${baskervilleOldFace.variable} ${baskervilleClassic.variable} ${baskervilleSC.variable} antialiased`}
       >
         <CartProvider>
-          <IssuesProvider issues={issues}>
-            <ArticlesProvider articles={articles} series={series}>
-              <LLNav />
-              {children}
-            </ArticlesProvider>
-          </IssuesProvider>
+          <BookshelfSettingsProvider>
+            <IssuesProvider issues={issues}>
+              <ArticlesProvider articles={articles} series={series}>
+                <LLNav />
+                {children}
+              </ArticlesProvider>
+            </IssuesProvider>
+          </BookshelfSettingsProvider>
           <CartDrawer />
         </CartProvider>
       </body>

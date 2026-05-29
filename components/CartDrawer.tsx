@@ -103,14 +103,11 @@ export default function CartDrawer() {
                     {subtotal % 1 === 0 ? subtotal : subtotal.toFixed(2)} kr
                   </span>
                 </div>
-                <span className="inline-flex rounded-[50%] bg-foreground overflow-hidden self-stretch">
-                  <Button
-                    variant="ghost"
-                    className="font-baskerVilleOld uppercase text-xl tracking-widest text-foreground hover:bg-transparent hover:text-background px-8 py-4 h-auto w-full "
-                  >
-                    Till kassan
-                  </Button>
-                </span>
+
+                <Button variant="default" className="">
+                  Till kassan
+                </Button>
+
                 <button
                   className="font-baskervilleSC hidden lowercase text-sm  text-foreground/50 hover:text-foreground transition-colors tracking-wider text-center "
                   onClick={clearCart}
