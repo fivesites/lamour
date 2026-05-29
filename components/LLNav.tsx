@@ -316,11 +316,11 @@ export default function LLNav() {
   return (
     <div
       className={`fixed top-0 left-0 z-50 flex flex-col transition-colors duration-500 group lg:w-14 lg:h-dvh lg:min-h-0
-        ${navOpen ? "w-full min-h-dvh bg-[#FCC5F8]" : "w-full h-16 "}`}
+        ${navOpen ? "w-full min-h-dvh bg-background" : "w-full h-16 "}`}
     >
       {/* ── MOBILE HEADER ── */}
       <div
-        className={`lg:hidden flex items-center w-full shrink-0 h-14 px-4 transition-colors duration-200 ${navOpen ? "bg-[#FCC5F8]" : "bg-background"}`}
+        className={`lg:hidden flex items-center shadow w-full shrink-0 h-14 px-4 transition-colors duration-200 ${navOpen ? "bg-[#FCC5F8]" : "bg-background"}`}
       >
         {/* Hamburger */}
         <button
