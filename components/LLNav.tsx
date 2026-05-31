@@ -22,24 +22,20 @@ function ArticleRow({
   article: Article;
   setNavOpen: (v: boolean) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   return (
-    <div
-      className={`relative flex items-center w-full border-b border-b-foreground min-h-12 py-2 pl-12 pr-12 ${expanded ? "" : "justify-center lg:justify-start"}`}
+    <Button
+      variant="navLink"
+      size="navLink"
+      className="justify-center lg:justify-start text-center lg:text-left"
+      asChild
     >
       <Link
-        className="font-baskervilleSC text-2xl tracking-widest lowercase flex justify-center text-center  max-w-sm"
         href={`/articles/${article.slug.current}`}
         onClick={() => setNavOpen(false)}
       >
         {article.title}
       </Link>
-      <motion.div
-        animate={{ flexGrow: expanded ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="shrink-0 min-w-0"
-      />
-    </div>
+    </Button>
   );
 }
 
@@ -52,25 +48,21 @@ function IssueRow({
   setNavOpen: (v: boolean) => void;
   addToCart: (item: { id: string; title: string; price: string }) => void;
 }) {
-  const [expanded, setExpanded] = useState(false);
   return (
-    <div
-      className={`relative flex items-center w-full border-b border-b-foreground h-auto min-h-12 pl-16 pr-16 lg:pr-6 ${expanded ? "" : "justify-center lg:justify-start"}`}
+    <Button
+      variant="navLink"
+      size="navLink"
+      className="justify-center lg:justify-start text-center lg:text-left"
+      asChild
     >
       <Link
-        className="font-baskervilleSC text-2xl tracking-widest gap-x-4 lowercase flex justify-start"
         href={`/shop/${issue.slug.current}`}
         onClick={() => setNavOpen(false)}
       >
-        <span className="lowercase">LL{issue.issueNumber}</span>
+        <span className="shrink-0">LL{issue.issueNumber}</span>
         {issue.title}
       </Link>
-      <motion.div
-        animate={{ flexGrow: expanded ? 1 : 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="shrink-0 min-w-0"
-      />
-    </div>
+    </Button>
   );
 }
 
@@ -94,20 +86,12 @@ function ArticleSubMenu({
         ))}
 
         <Button
-          variant="ghost"
-          className="px-12 pb-1 border-b border-b-foreground"
+          variant="navLink"
+          size="navLink"
+          className="justify-center lg:justify-start"
           onClick={() => setNavOpen(false)}
         >
-          <div className="flex w-full items-baseline justify-between">
-            {"läs alla".split("").map((char, i) => (
-              <span
-                key={i}
-                className="inline-block leading-none font-baskervilleSC transition-transform duration-300 hover:rotate-12 lowercase text-2xl"
-              >
-                {char === " " ? " " : char}
-              </span>
-            ))}
-          </div>
+          läs alla
         </Button>
       </div>
     </div>
@@ -130,23 +114,15 @@ function ShopSubMenu({ setNavOpen }: { setNavOpen: (v: boolean) => void }) {
         ))}
 
         <Button
-          variant="ghost"
-          className="px-12 pb-1 border-b border-b-foreground"
+          variant="navLink"
+          size="navLink"
+          className="justify-center lg:justify-start"
           onClick={() => {
             setDrawerOpen(true);
             setNavOpen(false);
           }}
         >
-          <div className="flex w-full items-baseline justify-between ">
-            {"till kassan".split("").map((char, i) => (
-              <span
-                key={i}
-                className="inline-block leading-none font-baskervilleSC transition-transform duration-300 hover:rotate-12 lowercase text-2xl"
-              >
-                {char === " " ? " " : char}
-              </span>
-            ))}
-          </div>
+          till kassan
         </Button>
       </div>
     </div>
@@ -179,7 +155,7 @@ function NavOverlay({
     <AnimatePresence>
       {navOpen && (
         <motion.ul
-          className="flex flex-col  w-full justify-start items-start font-baskerville mt-24 lg:mt-0 py-0 list-none gap-y-2"
+          className="flex flex-col w-full justify-start items-start font-baskerville mt-24 lg:mt-0  py-0 list-none gap-y-2"
           initial="hidden"
           animate="visible"
           exit="hidden"
@@ -188,81 +164,45 @@ function NavOverlay({
             visible: { transition: { staggerChildren: 0.1 } },
           }}
         >
-          <motion.li
-            className={`w-full lg:col-span-1 ${openShopSubMenu ? "" : ""}`}
-            variants={ITEM_VARIANTS}
-          >
-            <span
-              className={`flex w-full border-b border-b-foreground items-center pl-6 pr-6 lg:pr-3 h-14 ${openShopSubMenu ? "" : "justify-center lg:justify-start"}`}
+          <motion.li className="w-full" variants={ITEM_VARIANTS}>
+            <Button
+              variant="navLink"
+              size="navLink"
+              className="justify-center lg:justify-between pr-4"
+              onClick={() => {
+                setOpenShopSubMenu(!openShopSubMenu);
+                setOpenArticleSubMenu(false);
+              }}
             >
-              <Link
-                href="/shop"
-                className="font-baskervilleSC lowercase text-2xl tracking-widest pr-6"
-                onClick={() => {
-                  setOpenShopSubMenu(!openShopSubMenu);
-                  setOpenArticleSubMenu(false);
-                  setNavOpen(false);
-                }}
-              >
-                Alla nummer
-              </Link>
-              <motion.div
-                animate={{ flexGrow: openShopSubMenu ? 1 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="shrink-0 min-w-0"
-              />
-              <button
-                className={`font-baskervilleSC lowercase text-2xl tracking-widest w-min ${
-                  openShopSubMenu ? "rotate-0" : "-rotate-90 mt-1"
-                }`}
-                onClick={() => {
-                  setOpenShopSubMenu(!openShopSubMenu);
-                  setOpenArticleSubMenu(false);
-                }}
+              Alla nummer
+              <span
+                className={`transition-transform duration-200 absolute right-6  ${openShopSubMenu ? "rotate-0" : "-rotate-90"}`}
               >
                 V
-              </button>
-            </span>
+              </span>
+            </Button>
             <AnimatePresence>
               {openShopSubMenu && <ShopSubMenu setNavOpen={setNavOpen} />}
             </AnimatePresence>
           </motion.li>
 
-          <motion.li
-            className={`w-full lg:col-span-2  ${!openShopSubMenu ? "" : ""}`}
-            variants={ITEM_VARIANTS}
-          >
-            <span
-              className={`flex w-full border-b border-b-foreground items-center pl-6 pr-6 lg:pr-3 h-14 ${openArticleSubMenu ? "" : "justify-center lg:justify-start"}`}
+          <motion.li className="w-full" variants={ITEM_VARIANTS}>
+            <Button
+              variant="navLink"
+              size="navLink"
+              className="justify-center lg:justify-between pr-4"
+              onClick={() => {
+                setOpenArticleSubMenu(!openArticleSubMenu);
+                setOpenShopSubMenu(false);
+              }}
             >
-              <Link
-                href="/articles"
-                className="font-baskervilleSC lowercase text-2xl pr-6 tracking-widest"
-                onClick={() => {
-                  setOpenArticleSubMenu(!openArticleSubMenu);
-                  setOpenShopSubMenu(false);
-                  setNavOpen(false);
-                }}
-              >
-                Alla artiklar
-              </Link>
-              <motion.div
-                animate={{ flexGrow: openArticleSubMenu ? 1 : 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="shrink-0 min-w-0"
-              />
-              <button
-                className={`font-baskervilleSC lowercase text-2xl tracking-widest w-min ${
-                  openArticleSubMenu ? "rotate-0" : "-rotate-90 mt-1"
-                }`}
-                onClick={() => {
-                  setOpenArticleSubMenu(!openArticleSubMenu);
-                  setOpenShopSubMenu(false);
-                }}
+              Alla artiklar
+              <span
+                className={`transition-transform duration-200 absolute right-6 ${openArticleSubMenu ? "rotate-0" : "-rotate-90"}`}
               >
                 V
-              </button>
-            </span>
+              </span>
+            </Button>
             <AnimatePresence>
               {openArticleSubMenu && <ArticleSubMenu setNavOpen={setNavOpen} />}
             </AnimatePresence>
@@ -275,15 +215,16 @@ function NavOverlay({
             { label: "Nästa nummer", href: "/" },
           ].map(({ label, href }) => (
             <motion.li key={label} className="w-full" variants={ITEM_VARIANTS}>
-              <span className="flex w-full border-b border-b-foreground justify-center lg:justify-start items-center pl-6 pr-6 h-14">
-                <Link
-                  href={href}
-                  className="font-baskervilleSC lowercase text-2xl -mt-2 tracking-widest"
-                  onClick={() => setNavOpen(false)}
-                >
+              <Button
+                variant="navLink"
+                size="navLink"
+                className="justify-center lg:justify-start"
+                asChild
+              >
+                <Link href={href} onClick={() => setNavOpen(false)}>
                   {label}
                 </Link>
-              </span>
+              </Button>
             </motion.li>
           ))}
         </motion.ul>
@@ -308,7 +249,13 @@ export default function LLNav() {
   } = useBookshelfSettings();
   const { articles } = useArticles();
   const issues = useIssues();
-  const { totalItems, setDrawerOpen } = useCart();
+  const { totalItems, setDrawerOpen, addToCart } = useCart();
+
+  const isGridPage = pathname === "/shop" || pathname === "/articles";
+  const modeLabel = mode === "bak" ? "baksida" : "framsida";
+  function toggleGridMode() {
+    setMode(mode === "bak" ? "fram" : "bak");
+  }
 
   if (pathname.startsWith("/studio") || pathname.startsWith("/articles/"))
     return null;
@@ -320,7 +267,7 @@ export default function LLNav() {
     >
       {/* ── MOBILE HEADER ── */}
       <div
-        className={`lg:hidden flex items-center shadow w-full shrink-0 h-14 px-4 transition-colors duration-200 ${navOpen ? "bg-[#FCC5F8]" : "bg-background"}`}
+        className={`lg:hidden flex items-center shadow w-full shrink-0 h-14 px-4 transition-colors duration-200 ${navOpen ? "bg-transparent" : "bg-background"}`}
       >
         {/* Hamburger */}
         <button
@@ -339,7 +286,7 @@ export default function LLNav() {
             L'Amour
           </Link>
           <div
-            className={`h-px bg-foreground transition-[width] duration-200 ${navOpen ? "w-16" : "w-8"}`}
+            className={`bg-foreground transition-[width,height] duration-300 h-px lg:transition-[width,height] ${navOpen ? "w-16 lg:h-8" : "w-8"}`}
           />
           <Link
             href="/"
@@ -355,37 +302,45 @@ export default function LLNav() {
 
       {/* ── DESKTOP SIDEBAR ── */}
       <div
-        className={`hidden lg:flex flex-col items-center w-14 lg:group-hover:w-16 transition-[width,background-color] duration-200 h-full shrink-0 cursor-pointer ${navOpen ? "bg-[#FCC5F8]" : "bg-neutral-300"}`}
+        className={`hidden lg:flex flex-col items-center w-14 lg:group-hover:w-16 transition-[width,background-color] duration-200 h-full shrink-0 cursor-pointer ${navOpen ? "bg-neutral-300" : "bg-neutral-300"}`}
         onClick={() => setNavOpen((v) => !v)}
       >
-        <LLButton
-          text={navOpen ? "X" : "II"}
-          onClick={() => setNavOpen(!navOpen)}
-          className={` h-16 hidden  w-full items-center justify-center rounded-none p-4 text-xl shrink-0 ${navOpen ? "rotate-0 " : "rotate-90 -ml-2"}`}
-        />
-        <div className="flex flex-col justify-start items-center flex-1 pt-8 gap-4 ">
-          <Link
-            href="/"
-            className="font-baskervilleSC text-xl tracking-wider hover:opacity-60 lowercase  transition-opacity whitespace-nowrap"
-            style={{ writingMode: "vertical-lr", transform: "rotate(0deg)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            L'Amour
-          </Link>
-          <div className="w-px h-8 bg-foreground my-1 -ml-2" />
-          <Link
-            href="/"
-            className="font-baskervilleSC text-xl tracking-wider hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
-            style={{ writingMode: "vertical-rl", transform: "rotate(0deg)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            La Mort
-          </Link>
-        </div>
+        {navOpen ? (
+          <div className="flex flex-col items-center justify-start flex-1 pt-8">
+            <span
+              className="font-baskervilleSC text-lg tracking-widest lowercase whitespace-nowrap hover:opacity-60 transition-opacity"
+              style={{ writingMode: "vertical-rl" }}
+            >
+              stäng (x)
+            </span>
+          </div>
+        ) : (
+          <div className="flex flex-col justify-start items-center flex-1 pt-8 gap-4">
+            <Link
+              href="/"
+              className="font-baskervilleSC text-xl tracking-wider hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
+              style={{ writingMode: "vertical-lr", transform: "rotate(0deg)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              L'Amour
+            </Link>
+            <div className="w-px h-8 bg-foreground my-1 -ml-2" />
+            <Link
+              href="/"
+              className="font-baskervilleSC text-xl tracking-wider hover:opacity-60 lowercase transition-opacity whitespace-nowrap"
+              style={{ writingMode: "vertical-rl", transform: "rotate(0deg)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              La Mort
+            </Link>
+          </div>
+        )}
       </div>
 
-      {/* ── MOBILE NAV OVERLAY ── */}
-      <div className="lg:hidden flex flex-col flex-1">
+      {/* ── NAV OVERLAY (mobile: full-width scrollable; desktop: fixed panel next to sidebar) ── */}
+      <div
+        className={`flex flex-col flex-1 overflow-y-auto ${navOpen ? "lg:fixed lg:top-0 lg:left-14 lg:h-dvh lg:overflow-y-auto lg:z-70 lg:bg-[#FCC5F8] lg:w-80" : "lg:hidden"}`}
+      >
         <NavOverlay
           navOpen={navOpen}
           openShopSubMenu={openShopSubMenu}
@@ -396,36 +351,133 @@ export default function LLNav() {
         />
       </div>
 
-      {/* ── DESKTOP NAV OVERLAY (fixed panel right of sidebar) ── */}
+      {/* ── DESKTOP NAV OVERLAY (full-width 4-column grid) ── */}
       {navOpen && (
-        <div className="hidden lg:block fixed left-14 lg:group-hover:left-16 transition-[left] duration-200 top-0 h-dvh bg-[#FCC5F8] w-md overflow-y-auto z-40">
-          <NavOverlay
-            navOpen={navOpen}
-            openShopSubMenu={openShopSubMenu}
-            setOpenShopSubMenu={setOpenShopSubMenu}
-            openArticleSubMenu={openArticleSubMenu}
-            setOpenArticleSubMenu={setOpenArticleSubMenu}
-            setNavOpen={setNavOpen}
-          />
+        <div className="hidden lg:grid grid-cols-4 fixed left-14 lg:group-hover:left-16 transition-[left] duration-200 top-0 h-dvh right-0 z-70 bg-[#FCC5F8]">
+          {/* Column 1 — Alla nummer */}
+          <div className="flex flex-col border-r border-foreground/20 overflow-y-auto">
+            <Button
+              variant="navLink"
+              size="navLink"
+              asChild
+              className="shrink-0"
+            >
+              <Link href="/shop" onClick={() => setNavOpen(false)}>
+                Alla nummer
+              </Link>
+            </Button>
+            {issues.map((issue) => (
+              <IssueRow
+                key={issue._id}
+                issue={issue}
+                setNavOpen={setNavOpen}
+                addToCart={addToCart}
+              />
+            ))}
+          </div>
+
+          {/* Column 2 — Alla artiklar */}
+          <div className="flex flex-col border-r border-foreground/20 overflow-y-auto">
+            <Button
+              variant="navLink"
+              size="navLink"
+              asChild
+              className="shrink-0"
+            >
+              <Link href="/articles" onClick={() => setNavOpen(false)}>
+                Alla artiklar
+              </Link>
+            </Button>
+            {articles.map((article) => (
+              <ArticleRow
+                key={article._id}
+                article={article}
+                setNavOpen={setNavOpen}
+              />
+            ))}
+          </div>
+
+          {/* Column 3 — Other links */}
+          <div className="flex flex-col border-r border-foreground/20">
+            {[
+              { label: "Om oss", href: "/" },
+              { label: "Prenumerera", href: "/" },
+              { label: "Kontakt", href: "/" },
+              { label: "Nästa nummer", href: "/" },
+            ].map(({ label, href }) => (
+              <Button key={label} variant="navLink" size="navLink" asChild>
+                <Link href={href} onClick={() => setNavOpen(false)}>
+                  {label}
+                </Link>
+              </Button>
+            ))}
+          </div>
+
+          {/* Column 4 — Cart & frakt */}
+          <div className="flex flex-col">
+            <Button
+              variant="navLink"
+              size="navLink"
+              onClick={() => setDrawerOpen(true)}
+            >
+              I varukorgen ({totalItems})
+            </Button>
+            <Button
+              variant="navLink"
+              size="navLink"
+              onClick={() => {
+                setDrawerOpen(true);
+                setNavOpen(false);
+              }}
+            >
+              Till kassan
+            </Button>
+            <Button
+              variant="navLink"
+              size="navLink"
+              className="cursor-default hover:opacity-100"
+            >
+              Frakt &amp; info
+            </Button>
+          </div>
         </div>
       )}
 
-      <motion.button
-        key={totalItems}
-        className="fixed top-0 right-0 z-60 font-baskerVilleOld h-14 inline-flex items-center px-4 lg:h-16 hover:opacity-50 transition-opacity"
-        initial={{ opacity: 0, y: 4 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        onClick={() => setDrawerOpen(true)}
-        aria-label="Öppna korg"
-      >
-        <span className="hidden lg:flex font-baskervilleSC text-lg lowercase">
-          I varukorgen ({totalItems})
-        </span>
-        <span className="flex lg:hidden font-baskervilleSC text-lg lowercase">
-          ({totalItems})
-        </span>
-      </motion.button>
+      <div className="fixed top-0 right-0 z-60 flex items-center h-14 lg:h-16">
+        {isGridPage && (
+          <button
+            onClick={toggleGridMode}
+            className="hidden lg:inline-flex h-full items-center px-4 font-baskervilleSC text-lg lowercase tracking-widest hover:opacity-50 transition-opacity"
+          >
+            {modeLabel}
+          </button>
+        )}
+        <motion.button
+          key={totalItems}
+          className="h-full inline-flex items-center px-4 font-baskerVilleOld hover:opacity-50 transition-opacity"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: "easeOut" }}
+          onClick={() => setDrawerOpen(true)}
+          aria-label="Öppna korg"
+        >
+          <span className="hidden lg:flex font-baskervilleSC text-lg lowercase tracking-widest">
+            I varukorgen ({totalItems})
+          </span>
+          <span className="flex lg:hidden font-baskervilleSC text-lg lowercase">
+            ({totalItems})
+          </span>
+        </motion.button>
+      </div>
+
+      {isGridPage && (
+        <button
+          onClick={toggleGridMode}
+          className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-40 font-baskervilleSC text-lg tracking-widest h-10 lowercase bg-background border border-foreground/20 px-6 pt-1 pb-2 hover:opacity-60 transition-opacity"
+        >
+          {modeLabel}
+        </button>
+      )}
     </div>
   );
 }

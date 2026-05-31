@@ -11,6 +11,7 @@ export type Article = {
   series?: { title: string; slug: { current: string } };
   coverImage?: { asset: { _ref: string }; alt?: string };
   publishedAt?: string;
+  bodyLength?: number;
 };
 
 export type Series = {

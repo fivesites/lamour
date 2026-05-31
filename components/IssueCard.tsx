@@ -178,7 +178,7 @@ export default function IssueCard({
                   className="w-full h-14 lg:h-20 pb-1 tracking-widest lowercase text-lg lg:text-xl flex items-center justify-center font-baskervilleSC "
                   onClick={onClose}
                 >
-                  {issue.title} / Stäng (x)
+                  Stäng (x)
                 </span>
               </div>
               <div className="hidden lg:flex items-center   shrink-0 w-full">
@@ -328,7 +328,7 @@ export default function IssueCard({
                   <Button
                     variant="ghost"
                     disabled={issue.inStock === false}
-                    className="disabled:opacity-30 shadow-md bg-secondary disabled:cursor-not-allowed w-full "
+                    className="disabled:opacity-30 justify-center flex shadow-md bg-secondary disabled:cursor-not-allowed w-full "
                     onClick={() => {
                       if (openShopInfo) {
                         handleAddToCart();
