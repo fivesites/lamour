@@ -286,7 +286,7 @@ export default function LLNav() {
             L'Amour
           </Link>
           <div
-            className={`bg-foreground transition-[width,height] duration-300 h-px lg:transition-[width,height] ${navOpen ? "w-16 lg:h-8" : "w-8"}`}
+            className={`bg-foreground transition-[width,height] duration-300 h-px mt-1 lg:pl-1 lg:transition-[width,height] ${navOpen ? "w-16 lg:h-8" : "w-8"}`}
           />
           <Link
             href="/"
